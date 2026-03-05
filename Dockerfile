@@ -27,6 +27,7 @@ RUN apk add --no-cache dumb-init
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/server ./server
 
 # Create non-root user
