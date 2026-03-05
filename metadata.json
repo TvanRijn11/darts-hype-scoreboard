@@ -1,0 +1,5 @@
+{
+  "name": "Darts Hype Scoreboard",
+  "description": "A simple two-player 501 darts scoreboard with a built-in hype soundboard.",
+  "requestFramePermissions": []
+}

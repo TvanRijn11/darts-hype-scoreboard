@@ -1,0 +1,26 @@
+# Development Dockerfile
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install dumb-init for proper signal handling
+RUN apk add --no-cache dumb-init
+
+# Copy package files
+COPY package.json package-lock.json* ./
+
+# Install dependencies (including dev dependencies)
+RUN npm ci
+
+# Expose port
+EXPOSE 3000
+
+# Set environment to development
+ENV NODE_ENV=development
+ENV PORT=3000
+
+# Use dumb-init to handle signals
+ENTRYPOINT ["dumb-init", "--"]
+
+# Start dev server with hot reload
+CMD ["npm", "run", "dev"]

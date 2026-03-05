@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      WATCHPACK_POLLING: "true"
+    volumes:
+      # Mount source code for hot reload
+      - .:/app
+      # Exclude node_modules to use container's installed packages
+      - /app/node_modules
+      # Exclude .next to avoid conflicts
+      - /app/.next
+    restart: unless-stopped
+    container_name: darts-app-dev
