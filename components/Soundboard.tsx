@@ -38,8 +38,9 @@ export const Soundboard: React.FC = () => {
   React.useEffect(() => {
     setMounted(true);
     if (typeof window === "undefined") return;
+    console.log("WS_URL", WS_URL);
 
-    const s = io(WS_URL, {
+    const s = io("http://192.168.3.136:4000", {
       transports: ["websocket"],
     });
     setSocket(s);

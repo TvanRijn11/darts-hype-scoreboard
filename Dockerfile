@@ -20,8 +20,8 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dumb-init to handle signals properly
-RUN apk add --no-cache dumb-init
+# Install dumb-init to handle signals properly and audio player for server sounds
+RUN apk add --no-cache dumb-init mpg123
 
 # Copy built application from builder
 COPY --from=builder /app/public ./public
