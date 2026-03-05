@@ -27,14 +27,16 @@ RUN apk add --no-cache dumb-init
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/server ./server
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
 USER nextjs
 
-# Expose port
+# Expose ports
 EXPOSE 3000
+EXPOSE 4000
 
 # Set environment to production
 ENV NODE_ENV=production
@@ -47,5 +49,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 # Use dumb-init to handle signals
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start the application
-CMD ["node", "server.js"]
+# Start the Next.js server and WebSocket server
+CMD ["sh", "-c", "node server/websocket-server.js & node server.js"]
