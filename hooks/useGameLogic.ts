@@ -122,7 +122,7 @@ export const useGameLogic = (initialPlayers?: Player[]) => {
 
       if (scoreStatus === 'bust') {
         if (!commentaryEnabled && scoreEntered !== 180) playSound('bust');
-        // For busts, the score doesn't change, but we still record the move and switch turns
+        // For bwusts, the score doesn't change, but we still record the move and switch turns
         move.wasCurrentPlayer = false;
         setMoveHistory((prev) => [...prev, move]);
         switchTurn();
