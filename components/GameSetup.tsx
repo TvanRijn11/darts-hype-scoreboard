@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { User, Play } from "lucide-react";
 import { Player, GameMode } from "@/types/game";
@@ -23,6 +23,11 @@ export const GameSetup: React.FC<GameSetupProps> = ({
   onGameModeChange,
 }) => {
   const [step, setStep] = useState<'mode' | 'count' | 'names'>('mode');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleGameModeSelect = (mode: GameMode) => {
     onGameModeChange(mode);
@@ -39,12 +44,18 @@ export const GameSetup: React.FC<GameSetupProps> = ({
     onStartGame(players);
   };
 
+  const Container: React.ElementType = mounted ? motion.div : "div";
+
   return (
-    <motion.div
+    <Container
       key="setup"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+      {...(mounted
+        ? {
+            initial: false,
+            animate: { opacity: 1, y: 0 },
+            exit: { opacity: 0, y: -20 },
+          }
+        : {})}
       className="bg-zinc-900/50 border border-zinc-800 rounded-3xl p-6 md:p-8 backdrop-blur-sm"
     >
       {step === 'mode' && (
@@ -68,9 +79,10 @@ export const GameSetup: React.FC<GameSetupProps> = ({
                 <div className="text-xs font-bold uppercase tracking-wider opacity-60">
                   {mode === 'cricket' ? 'Strategy' : 'Target'}
                 </div>
-                {gameMode === mode && (
+                {mounted && gameMode === mode && (
                   <motion.div
                     layoutId="activeMode"
+                    initial={false}
                     className="absolute inset-0 bg-emerald-500/10 pointer-events-none"
                   />
                 )}
@@ -148,6 +160,6 @@ export const GameSetup: React.FC<GameSetupProps> = ({
           </button>
         </form>
       )}
-    </motion.div>
+    </Container>
   );
 };

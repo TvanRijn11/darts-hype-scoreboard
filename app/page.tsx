@@ -1,4 +1,4 @@
-import DartsGame from '@/components/DartsGame';
+import DartsGame from "@/components/DartsGame";
 
 export default function Home() {
   return (

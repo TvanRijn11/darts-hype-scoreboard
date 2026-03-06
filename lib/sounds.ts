@@ -15,16 +15,40 @@ const SOUND_URLS: Record<SoundType, string> = {
   'shame': '/sounds/shame.mp3',
 };
 
-// Audio instances to stop previous sounds
-const audioInstances: Record<SoundType, HTMLAudioElement | null> = {
-  '180': null,
-  'bust': null,
-  'winner': null,
-  '67': null,
-  'indian-song': null,
-  'luke-the-nuke': null,
-  'seven nation army': null,
-  'shame': null,
+let currentAudio: HTMLAudioElement | null = null;
+let currentType: SoundType | null = null;
+
+export type SoundPlaybackStatus = 'playing' | 'stopped';
+export type SoundPlaybackEvent = { type: SoundType; status: SoundPlaybackStatus };
+
+const playbackListeners = new Set<(event: SoundPlaybackEvent) => void>();
+
+export const onSoundPlayback = (
+  listener: (event: SoundPlaybackEvent) => void
+): (() => void) => {
+  playbackListeners.add(listener);
+  return () => playbackListeners.delete(listener);
+};
+
+const emitPlayback = (event: SoundPlaybackEvent) => {
+  playbackListeners.forEach((l) => l(event));
+};
+
+export const speakScore = (score: number | string): void => {
+  if (typeof window === 'undefined') return;
+  if (!window.speechSynthesis) return;
+
+  // Don't stop currently playing audio here; only manage speech.
+  window.speechSynthesis.cancel();
+
+  const msg = new SpeechSynthesisUtterance();
+  msg.lang = 'en-GB';
+  msg.text = `${score}`;
+  msg.rate = 1.05;
+  msg.pitch = 1.0;
+  msg.volume = 1;
+
+  window.speechSynthesis.speak(msg);
 };
 
 /**
@@ -33,24 +57,46 @@ const audioInstances: Record<SoundType, HTMLAudioElement | null> = {
 export const playSound = (type: SoundType): void => {
   if (typeof window === 'undefined') return;
 
-  // Stop any currently playing sound of this type
-  if (audioInstances[type]) {
-    audioInstances[type]?.pause();
-    audioInstances[type] = null;
+  // Stop anything currently playing (audio or speech) before starting a new sound
+  if (currentType) emitPlayback({ type: currentType, status: 'stopped' });
+  if (currentAudio) {
+    try {
+      currentAudio.pause();
+      currentAudio.currentTime = 0;
+    } catch {
+      // ignore
+    }
+    currentAudio = null;
   }
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
+  currentType = type;
+  emitPlayback({ type, status: 'playing' });
 
   // Try to play audio file first
   try {
     const audioUrl = SOUND_URLS[type];
     if (audioUrl) {
       const audio = new Audio(audioUrl);
-      audioInstances[type] = audio;
-      
+      currentAudio = audio;
+
+      const clearIfCurrent = () => {
+        if (currentAudio === audio) {
+          currentAudio = null;
+          if (currentType === type) {
+            currentType = null;
+            emitPlayback({ type, status: 'stopped' });
+          }
+        }
+      };
+      audio.addEventListener('ended', clearIfCurrent);
+      audio.addEventListener('pause', clearIfCurrent);
+
       audio.play().catch(() => {
         // If audio fails, fall back to speech synthesis
+        if (currentAudio === audio) currentAudio = null;
         playSpeech(type);
       });
-      
+
       return;
     }
   } catch (error) {
@@ -70,6 +116,18 @@ const playSpeech = (type: SoundType): void => {
 
   const msg = new SpeechSynthesisUtterance();
   msg.lang = 'en-GB'; // British accent for darts!
+  msg.onend = () => {
+    if (currentType === type) {
+      currentType = null;
+      emitPlayback({ type, status: 'stopped' });
+    }
+  };
+  msg.onerror = () => {
+    if (currentType === type) {
+      currentType = null;
+      emitPlayback({ type, status: 'stopped' });
+    }
+  };
 
   switch (type) {
     case '180':

@@ -9,12 +9,13 @@ import {
   isValidX01Score as isValidScore,
   resetPlayersScores
 } from '@/lib/gameLogic';
-import { playSound } from '@/lib/sounds';
+import { playSound, speakScore } from '@/lib/sounds';
 
 export const useGameLogic = (initialPlayers?: Player[]) => {
   const [gameState, setGameState] = useState<GameState>('setup');
   const [gameMode, setGameMode] = useState<GameMode>('501');
   const [startingScore, setStartingScore] = useState(STARTING_SCORES['501']);
+  const [commentaryEnabled, setCommentaryEnabled] = useState(false);
 
   const [players, setPlayers] = useState<Player[]>(
     initialPlayers || [
@@ -112,12 +113,15 @@ export const useGameLogic = (initialPlayers?: Player[]) => {
         wasCurrentPlayer: true, // will be set to false if turn switches
       };
 
-      if (scoreEntered === 180) {
+      if (commentaryEnabled) {
+        // Speak what was entered each turn; avoid overlapping "hype" sounds.
+        speakScore(scoreEntered);
+      } else if (scoreEntered === 180) {
         playSound('180');
       }
 
       if (scoreStatus === 'bust') {
-        if (scoreEntered !== 180) playSound('bust');
+        if (!commentaryEnabled && scoreEntered !== 180) playSound('bust');
         // For busts, the score doesn't change, but we still record the move and switch turns
         move.wasCurrentPlayer = false;
         setMoveHistory((prev) => [...prev, move]);
@@ -143,7 +147,7 @@ export const useGameLogic = (initialPlayers?: Player[]) => {
         switchTurn();
       }
     },
-    [players, currentPlayerIndex, switchTurn]
+    [players, currentPlayerIndex, switchTurn, commentaryEnabled]
   );
 
   const handleNumpadClick = useCallback((num: string) => {
@@ -189,6 +193,8 @@ export const useGameLogic = (initialPlayers?: Player[]) => {
     gameState,
     gameMode,
     startingScore,
+    commentaryEnabled,
+    setCommentaryEnabled,
     players,
     currentPlayerIndex,
     inputValue,

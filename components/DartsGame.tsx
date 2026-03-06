@@ -22,6 +22,8 @@ export default function DartsGame() {
     gameState,
     gameMode,
     players,
+    commentaryEnabled,
+    setCommentaryEnabled,
     currentPlayerIndex,
     inputValue,
     winner,
@@ -47,7 +49,7 @@ export default function DartsGame() {
     <div className="w-full max-w-2xl mx-auto flex flex-col gap-8">
       <Header />
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
         {gameState === "setup" && (
           <GameSetup
             players={players}
@@ -65,6 +67,19 @@ export default function DartsGame() {
               players={players}
               currentPlayerIndex={currentPlayerIndex}
             />
+            <div className="flex items-center justify-center gap-3">
+              <button
+                type="button"
+                onClick={() => setCommentaryEnabled((v) => !v)}
+                className={`px-4 py-2 rounded-full border text-xs font-bold uppercase tracking-widest transition ${
+                  commentaryEnabled
+                    ? "bg-emerald-500 text-black border-emerald-400"
+                    : "bg-zinc-900 text-zinc-400 border-zinc-700 hover:bg-zinc-800"
+                }`}
+              >
+                Commentary {commentaryEnabled ? "On" : "Off"}
+              </button>
+            </div>
             <ScoreInput
               currentPlayerName={players[currentPlayerIndex].name}
               inputValue={inputValue}
