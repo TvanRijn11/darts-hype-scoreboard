@@ -6,11 +6,7 @@ import { SoundType } from "@/types/game";
 import { onSoundPlayback, playSound } from "@/lib/sounds";
 import { io, Socket } from "socket.io-client";
 
-const WS_URL =
-  process.env.NEXT_PUBLIC_WS_URL ||
-  (typeof window !== "undefined"
-    ? `http://${window.location.hostname}:4000`
-    : "");
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "";
 
 type OutputMode = "client" | "server";
 type Role = "controller" | "player";
@@ -45,7 +41,15 @@ export const Soundboard: React.FC = () => {
   );
   const [lastError, setLastError] = React.useState<string | null>(null);
   const serverPlayingTimeoutRef = React.useRef<number | null>(null);
-  const [wsUrl, setWsUrl] = React.useState<string>(WS_URL);
+  const wsUrl = WS_URL;
+  // const [wsUrl, setWsUrl] = React.useState<string>(() => {
+  //   if (WS_URL) return WS_URL;
+  //   console.log("url");
+  //   if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+  //     return "http://localhost:4000";
+  //   }
+  //   return "";
+  // });
   const [role, setRole] = React.useState<Role>("controller");
   const [outputMode, setOutputMode] = React.useState<OutputMode>("client");
   const [playbackTarget, setPlaybackTarget] =
@@ -68,7 +72,7 @@ export const Soundboard: React.FC = () => {
     if (qMode === "client" || qMode === "server") setOutputMode(qMode);
     if (qPlayback === "device" || qPlayback === "server")
       setPlaybackTarget(qPlayback);
-    if (typeof qWs === "string" && qWs.trim()) setWsUrl(qWs.trim());
+    // if (typeof qWs === "string" && qWs.trim()) setWsUrl(qWs.trim());
 
     // Fall back to localStorage (only if query param not provided)
     try {
@@ -83,7 +87,7 @@ export const Soundboard: React.FC = () => {
         setOutputMode(lsMode);
       if (!qPlayback && (lsPlayback === "device" || lsPlayback === "server"))
         setPlaybackTarget(lsPlayback);
-      if (!qWs && lsWs) setWsUrl(lsWs);
+      // if (!qWs && lsWs) setWsUrl(lsWs);
     } catch {
       // ignore
     }
@@ -243,43 +247,7 @@ export const Soundboard: React.FC = () => {
             Hype Soundboard
           </h3>
         </div>
-        <button
-          type="button"
-          onClick={() => setShowServerConfig((v) => !v)}
-          className="px-3 py-1 rounded-full border border-zinc-700 text-xs font-medium text-zinc-300 bg-zinc-900 hover:bg-zinc-800 transition"
-        >
-          {showServerConfig ? "Hide server config" : "Server config"}
-        </button>
       </div>
-      {showServerConfig && (
-        <div className="mb-4 rounded-2xl border border-zinc-800 bg-zinc-950/40 p-4 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <label className="text-xs text-zinc-400">
-              WS server URL
-              <input
-                value={wsUrl}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setWsUrl(value);
-                  try {
-                    if (typeof window !== "undefined") {
-                      window.localStorage.setItem("darts.wsUrl", value);
-                    }
-                  } catch {
-                    // ignore
-                  }
-                }}
-                className="mt-1 w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-emerald-500"
-                placeholder="http://hostname:4000"
-                inputMode="url"
-                autoCapitalize="off"
-                autoCorrect="off"
-                spellCheck={false}
-              />
-            </label>
-          </div>
-        </div>
-      )}
       <div className="flex justify-center mb-4 gap-2 text-xs">
         <button
           type="button"
