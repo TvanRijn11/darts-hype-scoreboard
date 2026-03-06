@@ -185,7 +185,7 @@ export const useGameLogic = (initialPlayers?: Player[]) => {
   const changeGameMode = useCallback((mode: GameMode) => {
     setGameMode(mode);
     setStartingScore(STARTING_SCORES[mode]);
-    // Reset players for the new mode
+    // Reset playerers for the new mode
     setPlayers((prev) => resetPlayersScores(prev, mode, STARTING_SCORES[mode]));
   }, []);
 
