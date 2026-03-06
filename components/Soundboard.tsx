@@ -99,7 +99,7 @@ export const Soundboard: React.FC = () => {
     setLastError(null);
     setConnectionStatus("connecting");
 
-    const s = io(url, {
+    const s = io("https://eleven-toes-yell.loca.lt", {
       transports: ["websocket"],
       autoConnect: true,
       reconnection: true,
