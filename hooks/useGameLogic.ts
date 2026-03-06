@@ -120,13 +120,7 @@ export const useGameLogic = (initialPlayers?: Player[]) => {
         playSound('180');
       }
 
-      if (scoreStatus === 'bust') {
-        if (!commentaryEnabled && scoreEntered !== 180) playSound('bust');
-        // For bwusts, the score doesn't change, but we still record the move and switch turns
-        move.wasCurrentPlayer = false;
-        setMoveHistory((prev) => [...prev, move]);
-        switchTurn();
-      } else if (scoreStatus === 'winner') {
+      if (scoreStatus === 'winner') {
         setPlayers((prev) => {
           const updated = [...prev];
           updated[currentPlayerIndex].score = 0;
@@ -135,7 +129,7 @@ export const useGameLogic = (initialPlayers?: Player[]) => {
         setMoveHistory((prev) => [...prev, move]);
         setWinner(currentPlayer);
         setGameState('finished');
-        playSound('winner');
+        playSound('trap');
       } else {
         setPlayers((prev) => {
           const updated = [...prev];

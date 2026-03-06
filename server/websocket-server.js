@@ -29,13 +29,13 @@ const io = new Server(httpServer, {
 // Map sound IDs to audio file paths relative to /public
 const SOUND_PATHS = {
   "180": "sounds/180.mp3",
-  bust: "sounds/bust.mp3",
-  winner: "sounds/winner.mp3",
   "67": "sounds/67.mp3",
   "indian-song": "sounds/indian-song.mp3",
   "luke-the-nuke": "sounds/luke-the-nuke.mp3",
   "seven nation army": "sounds/seven-nation-army.mp3",
-  shame: "sounds/shame.mp3",
+  "kip": "sounds/kip.mp3",
+  "messi": "sounds/messi.mp3",
+  "trap": "sounds/trap.mp3",  
 };
 
 let currentAudioProcess = null;

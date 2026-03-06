@@ -32,9 +32,9 @@ const SOUNDS: Array<{ type: SoundType; label: string; borderColor: string }> = [
     label: "SEVEN NATION ARMY",
     borderColor: "teal",
   },
-  { type: "shame", label: "SHAME!", borderColor: "orange" },
-  { type: "bust", label: "BUST", borderColor: "red" },
-  { type: "winner", label: "WINNER", borderColor: "yellow" },
+  { type: "kip", label: "KIP!", borderColor: "orange" },
+  { type: "messi", label: "MESSI!", borderColor: "red" },
+  { type: "trap", label: "TRAP!", borderColor: "yellow" },
 ];
 
 export const Soundboard: React.FC = () => {

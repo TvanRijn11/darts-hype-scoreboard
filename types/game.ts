@@ -31,10 +31,10 @@ export interface GameSettings {
 
 export type SoundType =
   | '180'
-  | 'bust'
-  | 'winner'
   | '67'
   | 'indian-song'
   | 'luke-the-nuke'
   | 'seven nation army'
-  | 'shame';
+  | 'messi'
+  | 'kip'
+  | 'trap';

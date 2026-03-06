@@ -24,14 +24,15 @@ export const initializeSounds = (): void => {
   // Use local MP3 files for best performance
   // Game sounds
   setSoundURL('180', '/sounds/180.mp3');
-  setSoundURL('bust', '/sounds/bust.mp3');
-  setSoundURL('winner', '/sounds/winner.mp3');
+
   // Soundboard sounds
   setSoundURL('67', '/sounds/67.mp3');
   setSoundURL('indian-song', '/sounds/indian-song.mp3');
   setSoundURL('luke-the-nuke', '/sounds/luke-the-nuke.mp3');
   setSoundURL('seven nation army', '/sounds/seven-nation-army.mp3');
-  setSoundURL('shame', '/sounds/shame.mp3');
+  setSoundURL('kip', '/sounds/kip.mp3');
+  setSoundURL('messi', '/sounds/messi.mp3');
+  setSoundURL('trap', '/sounds/winner.mp3');
 };
 
 /**

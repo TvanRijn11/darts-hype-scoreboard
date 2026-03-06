@@ -6,13 +6,13 @@ import { SoundType } from '@/types/game';
 // These use free audio hosting services - feel free to add your own sound file URLs
 const SOUND_URLS: Record<SoundType, string> = {
   '180': '/sounds/180.mp3',
-  'bust': '/sounds/bust.mp3',
-  'winner': '/sounds/winner.mp3',
   '67': '/sounds/67.mp3',
   'indian-song': '/sounds/indian-song.mp3',
   'luke-the-nuke': '/sounds/luke-the-nuke.mp3',
   'seven nation army': '/sounds/seven-nation-army.mp3',
-  'shame': '/sounds/shame.mp3',
+  'kip': '/sounds/kip.mp3',
+  'messi': '/sounds/messi.mp3',
+  'trap': '/sounds/trap.mp3',
 };
 
 let currentAudio: HTMLAudioElement | null = null;
@@ -135,16 +135,6 @@ const playSpeech = (type: SoundType): void => {
       msg.rate = 1.1;
       msg.pitch = 1.3;
       msg.volume = 1;
-      break;
-    case 'bust':
-      msg.text = 'No score!';
-      msg.rate = 1.0;
-      msg.pitch = 0.8;
-      break;
-    case 'winner':
-      msg.text = 'Game shot, and the match!';
-      msg.rate = 1.1;
-      msg.pitch = 1.1;
       break;
   }
 
