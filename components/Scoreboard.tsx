@@ -16,15 +16,15 @@ export const Scoreboard: React.FC<ScoreboardProps> = ({
   const getGridColsClass = () => {
     switch (players.length) {
       case 2:
-        return 'grid-cols-2';
+        return "grid-cols-2";
       case 3:
-        return 'grid-cols-3';
+        return "grid-cols-3";
       case 4:
-        return 'grid-cols-2 md:grid-cols-4';
+        return "grid-cols-2 md:grid-cols-4";
       case 5:
-        return 'grid-cols-2 md:grid-cols-5';
+        return "grid-cols-2 md:grid-cols-5";
       default:
-        return 'grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
+        return "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
     }
   };
 

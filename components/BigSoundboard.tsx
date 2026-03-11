@@ -5,10 +5,11 @@ import { Mic, MicOff, Volume2 } from "lucide-react";
 import { SoundType } from "@/types/game";
 import { onSoundPlayback, playSound } from "@/lib/sounds";
 import { io, Socket } from "socket.io-client";
+import { TalkButton } from "./TalkButton";
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL || "";
 
-type OutputMode = "client" | "server";
+type OutputMode = "client" | "server" | "server-talk";
 type Role = "controller" | "player";
 type PlaybackTarget = "device" | "server";
 type ConnectionStatus =
@@ -57,86 +58,16 @@ export const BigSoundboard: React.FC = () => {
   );
   const [lastError, setLastError] = React.useState<string | null>(null);
   const serverPlayingTimeoutRef = React.useRef<number | null>(null);
+
   const wsUrl = WS_URL;
-  // const [wsUrl, setWsUrl] = React.useState<string>(() => {
-  //   if (WS_URL) return WS_URL;
-  //   console.log("url");
-  //   if (typeof window !== "undefined" && window.location.hostname === "localhost") {
-  //     return "http://localhost:4000";
-  //   }
-  //   return "";
-  // });
+
   const [role, setRole] = React.useState<Role>("controller");
   const [outputMode, setOutputMode] = React.useState<OutputMode>("client");
   const [playbackTarget, setPlaybackTarget] =
     React.useState<PlaybackTarget>("device");
   const [connectionStatus, setConnectionStatus] =
     React.useState<ConnectionStatus>("idle");
-  const [showServerConfig, setShowServerConfig] = React.useState(false);
 
-  const [isTalking, setIsTalking] = React.useState(false);
-  const audioContextRef = React.useRef<AudioContext | null>(null);
-  const streamRef = React.useRef<MediaStream | null>(null);
-
-  const startTalking = async () => {
-    // 1. Safety check: ensure socket is connected
-    if (!socket || !socket.connected) {
-      console.error("Socket not connected");
-      return;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-
-      const AudioContextClass =
-        window.AudioContext || (window as any).webkitAudioContext;
-      const ctx = new AudioContextClass({ sampleRate: 44100 });
-      audioContextRef.current = ctx;
-
-      const source = ctx.createMediaStreamSource(stream);
-      // Use 4096 buffer size for a balance between latency and stability
-      const processor = ctx.createScriptProcessor(4096, 1, 1);
-
-      // Tell the server we are starting
-      socket.emit("start-voice");
-
-      processor.onaudioprocess = (e) => {
-        const inputData = e.inputBuffer.getChannelData(0);
-
-        // Check if there is actual sound (for debugging)
-        // If this never logs, the mic is silent/blocked
-        // console.log("Mic amplitude:", Math.max(...inputData));
-
-        const pcmData = new Int16Array(inputData.length);
-        for (let i = 0; i < inputData.length; i++) {
-          // Clamp and convert to 16-bit PCM
-          const s = Math.max(-1, Math.min(1, inputData[i]));
-          pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
-        }
-
-        // Use the socket directly from the outer scope
-        if (socket.connected) {
-          socket.emit("voice-data", pcmData.buffer);
-        }
-      };
-
-      source.connect(processor);
-      // CRITICAL: ScriptProcessor only works if connected to destination
-      processor.connect(ctx.destination);
-
-      setIsTalking(true);
-    } catch (err) {
-      console.error("Mic error:", err);
-    }
-  };
-
-  const stopTalking = () => {
-    socket?.emit("stop-voice");
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    audioContextRef.current?.close();
-    setIsTalking(false);
-  };
 
   React.useEffect(() => {
     setMounted(true);
@@ -152,9 +83,7 @@ export const BigSoundboard: React.FC = () => {
     if (qMode === "client" || qMode === "server") setOutputMode(qMode);
     if (qPlayback === "device" || qPlayback === "server")
       setPlaybackTarget(qPlayback);
-    // if (typeof qWs === "string" && qWs.trim()) setWsUrl(qWs.trim());
 
-    // Fall back to localStorage (only if query param not provided)
     try {
       const lsRole = window.localStorage.getItem("darts.role");
       const lsMode = window.localStorage.getItem("darts.outputMode");
@@ -352,7 +281,20 @@ export const BigSoundboard: React.FC = () => {
         >
           Remote player
         </button>
+        <button
+          type="button"
+          disabled={!canUseServer}
+          onClick={() => setOutputMode("server-talk")}
+          className={`px-3 py-1 rounded-full border text-xs font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${
+            outputMode === "server-talk"
+              ? "bg-emerald-500 text-black border-emerald-400"
+              : "bg-zinc-900 text-zinc-400 border-zinc-700 hover:bg-zinc-800"
+          }`}
+        >
+          Talk to remote player
+        </button>
       </div>
+      { outputMode !== "server-talk" ? (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {SOUNDS.map(({ type, label, borderColor }) =>
           (() => {
@@ -375,23 +317,11 @@ export const BigSoundboard: React.FC = () => {
           })(),
         )}
       </div>
+      ) : (
       <div className="mt-6 text-center">
-        <button
-          onMouseDown={startTalking}
-          onMouseUp={stopTalking}
-          onTouchStart={startTalking}
-          onTouchEnd={stopTalking}
-          className={`p-4 rounded-full transition ${
-            isTalking ? "bg-red-500 animate-pulse" : "bg-zinc-700"
-          }`}
-        >
-          {isTalking ? (
-            <Mic className="text-white" />
-          ) : (
-            <MicOff className="text-zinc-400" />
-          )}
-        </button>
+        <TalkButton socket={socket} />
       </div>
+      )}
     </div>
   );
 };

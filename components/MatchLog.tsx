@@ -28,7 +28,8 @@ export const MatchLog: React.FC<MatchLogProps> = ({ moves }) => {
         {/* Display moves in reverse chronological order (newest first) */}
         {[...moves].reverse().map((move, idx) => {
           const moveNumber = moves.length - idx;
-          const isBust = move.newScore === move.previousScore && Number(move.dartScore) > 0;
+          const isBust =
+            move.newScore === move.previousScore && Number(move.dartScore) > 0;
           const isWinning = move.newScore === 0;
 
           return (
@@ -58,11 +59,19 @@ export const MatchLog: React.FC<MatchLogProps> = ({ moves }) => {
                   </div>
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-zinc-400">Scored:</span>
-                    <span className="font-bold text-emerald-400">{move.dartScore}</span>
+                    <span className="font-bold text-emerald-400">
+                      {move.dartScore}
+                    </span>
                     <span className="text-zinc-600">•</span>
                     <span className="text-zinc-400">
                       {move.previousScore} →{" "}
-                      <span className={isWinning ? "text-emerald-400 font-bold" : "text-zinc-200"}>
+                      <span
+                        className={
+                          isWinning
+                            ? "text-emerald-400 font-bold"
+                            : "text-zinc-200"
+                        }
+                      >
                         {move.newScore}
                       </span>
                     </span>
