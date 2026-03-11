@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Volume2 } from "lucide-react";
+import { Mic, MicOff, Volume2 } from "lucide-react";
 import { SoundType } from "@/types/game";
 import { onSoundPlayback, playSound } from "@/lib/sounds";
 import { io, Socket } from "socket.io-client";
@@ -73,6 +73,66 @@ export const BigSoundboard: React.FC = () => {
   const [connectionStatus, setConnectionStatus] =
     React.useState<ConnectionStatus>("idle");
   const [showServerConfig, setShowServerConfig] = React.useState(false);
+
+  const [isTalking, setIsTalking] = React.useState(false);
+  const audioContextRef = React.useRef<AudioContext | null>(null);
+  const streamRef = React.useRef<MediaStream | null>(null);
+
+  const startTalking = async () => {
+      if (!window.isSecureContext || !navigator.mediaDevices) {
+        alert("Microphone access is only available over HTTPS or localhost.");
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        streamRef.current = stream;
+
+        audioContextRef.current = new window.AudioContext({
+          sampleRate: 44100,
+        });
+        const source = audioContextRef.current.createMediaStreamSource(stream);
+
+        // Processor to convert Float32 audio to Int16 (which the server player expects)
+        const processor = audioContextRef.current.createScriptProcessor(
+          4096,
+          1,
+          1,
+        );
+
+        socket?.emit("start-voice");
+
+        processor.onaudioprocess = (e) => {
+          const inputData = e.inputBuffer.getChannelData(0);
+
+          // Convert Float32Array to Int16Array (PCM)
+          const pcmData = new Int16Array(inputData.length);
+          for (let i = 0; i < inputData.length; i++) {
+            const s = Math.max(-1, Math.min(1, inputData[i]));
+            pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+          }
+
+          // Send raw bytes to server
+          socket?.emit("voice-data", pcmData.buffer);
+        };
+
+        source.connect(processor);
+        processor.connect(audioContextRef.current.destination);
+
+        setIsTalking(true);
+      } catch (err) {
+        console.error("Error accessing mic:", err);
+      }
+  };
+
+  const stopTalking = () => {
+    socket?.emit("stop-voice");
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    audioContextRef.current?.close();
+    setIsTalking(false);
+  };
 
   React.useEffect(() => {
     setMounted(true);
@@ -310,6 +370,23 @@ export const BigSoundboard: React.FC = () => {
             );
           })(),
         )}
+      </div>
+      <div className="mt-6 text-center">
+        <button
+          onMouseDown={startTalking}
+          onMouseUp={stopTalking}
+          onTouchStart={startTalking}
+          onTouchEnd={stopTalking}
+          className={`p-4 rounded-full transition ${
+            isTalking ? "bg-red-500 animate-pulse" : "bg-zinc-700"
+          }`}
+        >
+          {isTalking ? (
+            <Mic className="text-white" />
+          ) : (
+            <MicOff className="text-zinc-400" />
+          )}
+        </button>
       </div>
     </div>
   );

@@ -39,6 +39,8 @@ const SOUND_PATHS = {
 };
 
 let currentAudioProcess = null;
+let voicePlayerProcess = null;
+
 
 
 function playSoundOnServer(soundId) {
@@ -96,6 +98,39 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     console.log("client disconnected", socket.id);
+  });
+
+  socket.on("start-voice", () => {
+    console.log("Mic stream started");
+    
+    // Use ffplay for raw PCM data (S16 Little Endian, 44.1kHz, Mono)
+    // If using Linux/aplay: ['-f', 'cd', '-']
+    // If using Mac/sox: ['-t', 'raw', '-r', '44100', '-e', 'signed-integer', '-b', '16', '-c', '1', '-']
+    voicePlayerProcess = spawn("ffplay", [
+      "-f", "s16le", // Format: signed 16-bit little endian
+      "-ar", "44100", // Sample rate: 44100Hz
+      "-ac", "1",     // Channels: 1 (mono)
+      "-nodisp",     // No video window
+      "-",           // Read from stdin
+    ]);
+
+    voicePlayerProcess.on("error", (err) => {
+        console.error("Voice player error:", err);
+    });
+  });
+
+  socket.on("voice-data", (buffer) => {
+    if (voicePlayerProcess && voicePlayerProcess.stdin.writable) {
+      voicePlayerProcess.stdin.write(buffer);
+    }
+  });
+
+  socket.on("stop-voice", () => {
+    console.log("Mic stream stopped");
+    if (voicePlayerProcess) {
+      voicePlayerProcess.kill();
+      voicePlayerProcess = null;
+    }
   });
 });
 
