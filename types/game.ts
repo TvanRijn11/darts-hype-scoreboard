@@ -49,4 +49,11 @@ export type SoundType =
   | 'watermeloen'
   | 'running'
   | 'angelo'
-  | 'luchtalarm';
+  | 'luchtalarm'
+  | 'kale-dikke'
+  | 'boef'
+  | 'dat-moet-jeniet-willen'
+  | 'ik-dacht-dat-dat-kon'
+  | 'joel'
+  | 'noortje'
+  | 'wervelstorm';

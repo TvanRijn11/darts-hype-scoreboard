@@ -25,6 +25,13 @@ const SOUND_URLS: Record<SoundType, string> = {
   'running': '/sounds/running.mp3',
   'angelo': '/sounds/angelo.mp3',
   'luchtalarm': '/sounds/luchtalarm.mp3',
+  'kale-dikke': '/sounds/kale-dikke.mp3',
+  'boef': '/sounds/boef-x-mooie-dag.mp3',
+  'dat-moet-jeniet-willen': '/sounds/dat-moet-jeniet-willen.mp3',
+  'ik-dacht-dat-dat-kon': '/sounds/ik-dacht-dat-dat-kon.mp3',
+  'joel': '/sounds/joel.mp3',
+  'noortje': '/sounds/noortje.mp3',
+  'wervelstorm': '/sounds/wervelstorm.mp3',
 };
 
 let currentAudio: HTMLAudioElement | null = null;

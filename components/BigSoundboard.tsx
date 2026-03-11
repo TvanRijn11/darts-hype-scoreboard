@@ -48,6 +48,13 @@ const SOUNDS: Array<{ type: SoundType; label: string; borderColor: string }> = [
   { type: "running", label: "RUNNING!", borderColor: "purple" },
   { type: "angelo", label: "ANGELO!", borderColor: "green" },
   { type: "luchtalarm", label: "LUCHTALARM!", borderColor: "indigo" },
+  { type: "kale-dikke", label: "KALE DIKKE!", borderColor: "teal" },
+  { type: "boef", label: "BOEF!", borderColor: "orange" },
+  { type: "dat-moet-jeniet-willen", label: "DAT MOET JE NIET WILLEN!", borderColor: "red" },
+  { type: "ik-dacht-dat-dat-kon", label: "IK DACHT DAT DAT KON!", borderColor: "yellow" },
+  { type: "joel", label: "JOEL!", borderColor: "emerald" },
+  { type: "noortje", label: "NOORTJE!", borderColor: "purple" },
+  { type: "wervelstorm", label: "WERVELSTORM!", borderColor: "green" },
 ];
 
 export const BigSoundboard: React.FC = () => {
