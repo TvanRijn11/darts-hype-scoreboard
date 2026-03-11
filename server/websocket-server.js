@@ -28,18 +28,29 @@ const io = new Server(httpServer, {
 
 // Map sound IDs to audio file paths relative to /public
 const SOUND_PATHS = {
-  "180": "sounds/180.mp3",
-  "67": "sounds/67.mp3",
-  "indian-song": "sounds/indian-song.mp3",
-  "luke-the-nuke": "sounds/luke-the-nuke.mp3",
-  "seven nation army": "sounds/seven-nation-army.mp3",
-  "kip": "sounds/kip.mp3",
-  "messi": "sounds/messi.mp3",
-  "trap": "sounds/trap.mp3",  
+  '180': '/sounds/180.mp3',
+  '67': '/sounds/67.mp3',
+  'indian-song': '/sounds/indian-song.mp3',
+  'luke-the-nuke': '/sounds/luke-the-nuke.mp3',
+  'seven nation army': '/sounds/seven-nation-army.mp3',
+  'kip': '/sounds/kip.mp3',
+  'messi': '/sounds/messi.mp3',
+  'trap': '/sounds/trap.mp3',
+  'brainrot': '/sounds/brainrot.mp3',
+  'fbi': '/sounds/fbi.mp3',
+  'granny': '/sounds/granny.mp3',
+  'hema': '/sounds/hema.mp3',
+  'poepen': '/sounds/poepen.mp3',
+  'scream': '/sounds/scream.mp3',
+  'sinterklaasjournaal': '/sounds/sinterklaasjournaal.mp3',
+  'spetterpoep': '/sounds/spetterpoep.mp3',
+  'watermeloen': '/sounds/watermeloen.mp3',
+  'running': '/sounds/running.mp3',
+  'angelo': '/sounds/angelo.mp3',
+  'luchtalarm': '/sounds/luchtalarm.mp3',
 };
 
 let currentAudioProcess = null;
-
 
 function playSoundOnServer(soundId) {
   const relativePath = SOUND_PATHS[soundId];
