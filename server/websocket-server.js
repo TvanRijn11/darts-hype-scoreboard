@@ -120,26 +120,51 @@ io.on("connection", (socket) => {
 
   socket.on("start-voice", () => {
     console.log("Mic stream started");
-    
-    // Use ffplay for raw PCM data (S16 Little Endian, 44.1kHz, Mono)
-    // If using Linux/aplay: ['-f', 'cd', '-']
-    // If using Mac/sox: ['-t', 'raw', '-r', '44100', '-e', 'signed-integer', '-b', '16', '-c', '1', '-']
-    voicePlayerProcess = spawn("ffplay", [
-      "-f", "s16le", // Format: signed 16-bit little endian
-      "-ar", "44100", // Sample rate: 44100Hz
-      "-ac", "1",     // Channels: 1 (mono)
-      "-nodisp",     // No video window
-      "-",           // Read from stdin
-    ]);
 
-    voicePlayerProcess.on("error", (err) => {
-        console.error("Voice player error:", err);
-    });
+    const command = "aplay";
+    // We add "-D bluealsa" for bluetooth, or "-D hw:1,0" or "-D plughw:CARD=Headphones"
+    // Let's try "default" first, then a specific hardware path
+    const args = [
+      "-D", "plughw:2,0", // or try "plughw:CARD=Headphones,DEV=0"
+      "-f", "S16_LE",
+      "-r", "44100",
+      "-c", "1",
+      "-t", "raw",
+      "-"
+    ];
+
+    voicePlayerProcess = spawn(command, args);
+    // ... rest of your code
+
+  voicePlayerProcess.stdin.on("error", (err) => {
+    // This catches the EPIPE so the server doesn't crash
+    console.error("Stdin Error (usually voice stop):", err.message);
   });
 
-  socket.on("voice-data", (buffer) => {
-    if (voicePlayerProcess && voicePlayerProcess.stdin.writable) {
-      voicePlayerProcess.stdin.write(buffer);
+  voicePlayerProcess.on("error", (err) => {
+    console.error("Failed to start aplay. Is it installed?", err.message);
+  });
+});
+
+  socket.on("voice-data", (data) => {
+    // 1. Check if data actually exists
+    if (!data) return;
+
+    try {
+      // 2. Convert to Node.js Buffer (Socket.io usually sends a Buffer or ArrayBuffer)
+      const audioBuffer = Buffer.from(data);
+
+      // 3. Debug: Only log every ~100th packet to see it's working without lag
+      if (Math.random() > 0.99) {
+        console.log(`Streaming ${audioBuffer.length} bytes to audio player...`);
+      }
+
+      // 4. Write to the player's stdin
+      if (voicePlayerProcess && voicePlayerProcess.stdin.writable) {
+        voicePlayerProcess.stdin.write(audioBuffer);
+      }
+    } catch (err) {
+      console.error("Error processing voice-data:", err);
     }
   });
 
