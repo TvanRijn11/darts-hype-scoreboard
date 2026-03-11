@@ -79,52 +79,56 @@ export const BigSoundboard: React.FC = () => {
   const streamRef = React.useRef<MediaStream | null>(null);
 
   const startTalking = async () => {
-      if (!window.isSecureContext || !navigator.mediaDevices) {
-        alert("Microphone access is only available over HTTPS or localhost.");
-        return;
-      }
+    // 1. Safety check: ensure socket is connected
+    if (!socket || !socket.connected) {
+      console.error("Socket not connected");
+      return;
+    }
 
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        streamRef.current = stream;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      streamRef.current = stream;
 
-        audioContextRef.current = new window.AudioContext({
-          sampleRate: 44100,
-        });
-        const source = audioContextRef.current.createMediaStreamSource(stream);
+      const AudioContextClass =
+        window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioContextClass({ sampleRate: 44100 });
+      audioContextRef.current = ctx;
 
-        // Processor to convert Float32 audio to Int16 (which the server player expects)
-        const processor = audioContextRef.current.createScriptProcessor(
-          4096,
-          1,
-          1,
-        );
+      const source = ctx.createMediaStreamSource(stream);
+      // Use 4096 buffer size for a balance between latency and stability
+      const processor = ctx.createScriptProcessor(4096, 1, 1);
 
-        socket?.emit("start-voice");
+      // Tell the server we are starting
+      socket.emit("start-voice");
 
-        processor.onaudioprocess = (e) => {
-          const inputData = e.inputBuffer.getChannelData(0);
+      processor.onaudioprocess = (e) => {
+        const inputData = e.inputBuffer.getChannelData(0);
 
-          // Convert Float32Array to Int16Array (PCM)
-          const pcmData = new Int16Array(inputData.length);
-          for (let i = 0; i < inputData.length; i++) {
-            const s = Math.max(-1, Math.min(1, inputData[i]));
-            pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
-          }
+        // Check if there is actual sound (for debugging)
+        // If this never logs, the mic is silent/blocked
+        // console.log("Mic amplitude:", Math.max(...inputData));
 
-          // Send raw bytes to server
-          socket?.emit("voice-data", pcmData.buffer);
-        };
+        const pcmData = new Int16Array(inputData.length);
+        for (let i = 0; i < inputData.length; i++) {
+          // Clamp and convert to 16-bit PCM
+          const s = Math.max(-1, Math.min(1, inputData[i]));
+          pcmData[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+        }
 
-        source.connect(processor);
-        processor.connect(audioContextRef.current.destination);
+        // Use the socket directly from the outer scope
+        if (socket.connected) {
+          socket.emit("voice-data", pcmData.buffer);
+        }
+      };
 
-        setIsTalking(true);
-      } catch (err) {
-        console.error("Error accessing mic:", err);
-      }
+      source.connect(processor);
+      // CRITICAL: ScriptProcessor only works if connected to destination
+      processor.connect(ctx.destination);
+
+      setIsTalking(true);
+    } catch (err) {
+      console.error("Mic error:", err);
+    }
   };
 
   const stopTalking = () => {
