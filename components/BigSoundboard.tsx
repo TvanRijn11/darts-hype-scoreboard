@@ -58,6 +58,7 @@ export const BigSoundboard: React.FC = () => {
   );
   const [lastError, setLastError] = React.useState<string | null>(null);
   const serverPlayingTimeoutRef = React.useRef<number | null>(null);
+  const [talkMode, setTalkMode] = React.useState(false);
 
   const wsUrl = WS_URL;
 
@@ -260,7 +261,10 @@ export const BigSoundboard: React.FC = () => {
       <div className="flex justify-center mb-4 gap-2 text-xs">
         <button
           type="button"
-          onClick={() => setOutputMode("client")}
+          onClick={() => {
+            setOutputMode("client");
+            setTalkMode(false);
+          }}
           className={`px-3 py-1 rounded-full border text-xs font-medium transition ${
             outputMode === "client"
               ? "bg-emerald-500 text-black border-emerald-400"
@@ -272,9 +276,12 @@ export const BigSoundboard: React.FC = () => {
         <button
           type="button"
           disabled={!canUseServer}
-          onClick={() => setOutputMode("server")}
+          onClick={() => {
+            setOutputMode("server");
+            setTalkMode(false);
+          }}
           className={`px-3 py-1 rounded-full border text-xs font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${
-            outputMode === "server"
+            outputMode === "server" && !talkMode
               ? "bg-emerald-500 text-black border-emerald-400"
               : "bg-zinc-900 text-zinc-400 border-zinc-700 hover:bg-zinc-800"
           }`}
@@ -284,9 +291,12 @@ export const BigSoundboard: React.FC = () => {
         <button
           type="button"
           disabled={!canUseServer}
-          onClick={() => setOutputMode("server-talk")}
+          onClick={() => {
+            setOutputMode("server");
+            setTalkMode(true);
+          }}
           className={`px-3 py-1 rounded-full border text-xs font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${
-            outputMode === "server-talk"
+            talkMode
               ? "bg-emerald-500 text-black border-emerald-400"
               : "bg-zinc-900 text-zinc-400 border-zinc-700 hover:bg-zinc-800"
           }`}
@@ -294,7 +304,7 @@ export const BigSoundboard: React.FC = () => {
           Talk to remote player
         </button>
       </div>
-      { outputMode !== "server-talk" ? (
+      { !talkMode  ? (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {SOUNDS.map(({ type, label, borderColor }) =>
           (() => {
