@@ -31,9 +31,25 @@ const SOUNDS: Array<{ type: SoundType; label: string; borderColor: string }> = [
   { type: "kip", label: "KIP!", borderColor: "orange" },
   { type: "messi", label: "MESSI!", borderColor: "red" },
   { type: "trap", label: "TRAP!", borderColor: "yellow" },
+  { type: "brainrot", label: "BRAINROT!", borderColor: "emerald" },
+  { type: "fbi", label: "FBI OPEN UP!", borderColor: "purple" },
+  { type: "granny", label: "GRANNY!", borderColor: "green" },
+  { type: "hema", label: "HEMA!", borderColor: "indigo" },
+  { type: "poepen", label: "POEPEN!", borderColor: "teal" },
+  { type: "scream", label: "SCREAM!", borderColor: "orange" },
+  {
+    type: "sinterklaasjournaal",
+    label: "SINTERKLAASJOURNAAL!",
+    borderColor: "red",
+  },
+  { type: "spetterpoep", label: "SPETTERPOEP!", borderColor: "yellow" },
+  { type: "watermeloen", label: "WATERMELOEN!", borderColor: "emerald" },
+  { type: "running", label: "RUNNING!", borderColor: "purple" },
+  { type: "angelo", label: "ANGELO!", borderColor: "green" },
+  { type: "luchtalarm", label: "LUCHTALARM!", borderColor: "indigo" },
 ];
 
-export const Soundboard: React.FC = () => {
+export const BigSoundboard: React.FC = () => {
   const [mounted, setMounted] = React.useState(false);
   const [socket, setSocket] = React.useState<Socket | null>(null);
   const [playingSound, setPlayingSound] = React.useState<SoundType | null>(

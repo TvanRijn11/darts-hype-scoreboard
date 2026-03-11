@@ -13,6 +13,18 @@ const SOUND_URLS: Record<SoundType, string> = {
   'kip': '/sounds/kip.mp3',
   'messi': '/sounds/messi.mp3',
   'trap': '/sounds/trap.mp3',
+  'brainrot': '/sounds/brainrot.mp3',
+  'fbi': '/sounds/fbi.mp3',
+  'granny': '/sounds/granny.mp3',
+  'hema': '/sounds/hema.mp3',
+  'poepen': '/sounds/poepen.mp3',
+  'scream': '/sounds/scream.mp3',
+  'sinterklaasjournaal': '/sounds/sinterklaasjournaal.mp3',
+  'spetterpoep': '/sounds/spetterpoep.mp3',
+  'watermeloen': '/sounds/watermeloen.mp3',
+  'running': '/sounds/running.mp3',
+  'angelo': '/sounds/angelo.mp3',
+  'luchtalarm': '/sounds/luchtalarm.mp3',
 };
 
 let currentAudio: HTMLAudioElement | null = null;

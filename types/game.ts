@@ -37,4 +37,16 @@ export type SoundType =
   | 'seven nation army'
   | 'messi'
   | 'kip'
-  | 'trap';
+  | 'trap'
+  | 'brainrot'
+  | 'fbi'
+  | 'granny'
+  | 'hema'
+  | 'poepen'
+  | 'scream'
+  | 'sinterklaasjournaal'
+  | 'spetterpoep'
+  | 'watermeloen'
+  | 'running'
+  | 'angelo'
+  | 'luchtalarm';
