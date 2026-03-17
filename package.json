@@ -11,6 +11,7 @@
     "test": "vitest",
     "test:run": "vitest run",
     "ws-server": "node server/websocket-server.js",
+    "ws-server:ngrok": "USE_NGROK=true node server/websocket-server.js",
     "generate:sounds": "node scripts/generate-sounds.js",
     "add:sound": "node scripts/add-sound.js"
   },

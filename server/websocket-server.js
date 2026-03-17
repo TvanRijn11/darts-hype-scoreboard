@@ -1,7 +1,7 @@
 // Plain Node.js WebSocket server (CommonJS)
 const { createServer } = require("http");
 const path = require("path");
-const { spawn } = require("child_process");
+const { spawn, exec } = require("child_process");
 const express = require("express");
 const { Server } = require("socket.io");
 
@@ -11,6 +11,7 @@ const { SOUND_PATHS } = require("./sounds");
 const app = express();
 const httpServer = createServer(app);
 
+// Parse CORS origins from environment
 const parseAllowedOrigins = () => {
   const raw = process.env.WS_ALLOWED_ORIGINS;
   if (!raw) return "*";
@@ -23,10 +24,20 @@ const parseAllowedOrigins = () => {
   return parts;
 };
 
+const corsOrigins = parseAllowedOrigins();
+console.log("CORS origins:", corsOrigins);
+
 const io = new Server(httpServer, {
   cors: {
-    origin: parseAllowedOrigins(),
+    origin: corsOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
   },
+  // Required for ngrok free tier WebSocket support
+  allowEIO3: true,
+  // Help with connection stability through ngrok
+  pingTimeout: 60000,
+  pingInterval: 25000,
 });
 
 let currentAudioProcess = null;
@@ -142,6 +153,114 @@ io.on("connection", (socket) => {
 });
 
 const PORT = process.env.WS_PORT || 4000;
-httpServer.listen(PORT, () => {
+const USE_NGROK = process.env.USE_NGROK === "true";
+let ngrokProcess = null;
+
+async function startNgrokTunnel() {
+  return new Promise((resolve, reject) => {
+    console.log("Starting ngrok tunnel...");
+
+    // Check if ngrok is installed
+    exec("which ngrok", (err) => {
+      if (err) {
+        console.error("ngrok not found. Install it from https://ngrok.com/download");
+        reject(new Error("ngrok not installed"));
+        return;
+      }
+
+      // Start ngrok tunnel
+      ngrokProcess = spawn("ngrok", [
+        "http",
+        "--log=stdout",
+        PORT.toString(),
+      ], {
+        stdio: ["ignore", "pipe", "pipe"],
+      });
+
+      let urlFound = false;
+
+      ngrokProcess.stdout.on("data", (data) => {
+        const output = data.toString();
+        // Look for the ngrok URL in the output
+        const urlMatch = output.match(/https:\/\/[a-zA-Z0-9\-]+\.ngrok-free\.app/);
+        if (urlMatch && !urlFound) {
+          urlFound = true;
+          const ngrokUrl = urlMatch[0];
+          console.log("\n========================================");
+          console.log("NGROK TUNNEL URL:");
+          console.log(ngrokUrl);
+          console.log("========================================\n");
+          console.log("Use this URL in your frontend (set NEXT_PUBLIC_WS_URL)");
+          console.log("Or pass it via ?ws=<url> query parameter\n");
+
+          // Optionally save to a file for easy access
+          const fs = require("fs");
+          fs.writeFileSync(
+            path.join(__dirname, "ngrok-url.txt"),
+            ngrokUrl
+          );
+          console.log("URL also saved to server/ngrok-url.txt");
+
+          resolve(ngrokUrl);
+        }
+      });
+
+      ngrokProcess.stderr.on("data", (data) => {
+        // ngrok outputs some info to stderr, that's normal
+        const output = data.toString();
+        if (!output.includes("ts=conn") && !output.includes("msg=")) {
+          console.error("ngrok:", output.trim());
+        }
+      });
+
+      ngrokProcess.on("error", (err) => {
+        console.error("Failed to start ngrok:", err.message);
+        reject(err);
+      });
+
+      ngrokProcess.on("exit", (code) => {
+        if (code !== 0) {
+          console.log(`ngrok exited with code ${code}`);
+        }
+      });
+
+      // Timeout after 10 seconds if no URL found
+      setTimeout(() => {
+        if (!urlFound) {
+          console.log("Waiting for ngrok tunnel... (this may take a moment)");
+        }
+      }, 10000);
+    });
+  });
+}
+
+// Graceful shutdown
+function shutdown() {
+  console.log("\nShutting down...");
+  if (ngrokProcess) {
+    ngrokProcess.kill();
+  }
+  if (currentAudioProcess) {
+    currentAudioProcess.kill("SIGKILL");
+  }
+  if (voicePlayerProcess) {
+    voicePlayerProcess.kill();
+  }
+  process.exit(0);
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+
+// Start server
+httpServer.listen(PORT, async () => {
   console.log(`WebSocket server listening on :${PORT}`);
+
+  if (USE_NGROK) {
+    try {
+      await startNgrokTunnel();
+    } catch (err) {
+      console.log("Running without ngrok tunnel");
+    }
+  }
 });
