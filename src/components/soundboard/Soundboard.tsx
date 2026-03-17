@@ -27,7 +27,7 @@ export const Soundboard: React.FC = () => {
     isConnected 
   } = useWebSocket({ role, outputMode, playbackTarget });
 
-  const canUseServer = connectionStatus !== "idle";
+  const canUseServer = true;
 
   React.useEffect(() => {
     setMounted(true);

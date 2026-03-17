@@ -25,7 +25,8 @@ const parseAllowedOrigins = () => {
 };
 
 const corsOrigins = parseAllowedOrigins();
-console.log("CORS origins:", corsOrigins);
+console.log("[WS] CORS origins configured:", corsOrigins);
+console.log("[WS] Server starting on port:", PORT);
 
 const io = new Server(httpServer, {
   cors: {
@@ -40,47 +41,12 @@ const io = new Server(httpServer, {
   pingInterval: 25000,
 });
 
-let currentAudioProcess = null;
-let voicePlayerProcess = null;
-
-
-function playSoundOnServer(soundId) {
-  const relativePath = SOUND_PATHS[soundId];
-  if (!relativePath) {
-    console.warn("Unknown soundId:", soundId);
-    return;
-  }
-
-  const filePath = path.join(__dirname, "..", "public", relativePath);
-
-  // Choose a simple CLI audio player depending on platform
-  const isMac = process.platform === "darwin";
-  const player = isMac ? "afplay" : "mpg123";
-  const args = [filePath];
-
-  // Stop any currently playing sound before starting the next
-  if (currentAudioProcess && !currentAudioProcess.killed) {
-    try {
-      currentAudioProcess.kill("SIGKILL");
-    } catch (e) {
-      // ignore
-    }
-  }
-
-  const child = spawn(player, args, { stdio: "ignore" });
-  currentAudioProcess = child;
-
-  child.on("error", (err) => {
-    console.error("Failed to play sound on server:", err.message);
-  });
-
-  child.on("exit", () => {
-    if (currentAudioProcess === child) currentAudioProcess = null;
-  });
-}
-
+// Log all connection attempts
 io.on("connection", (socket) => {
-  console.log("client connected", socket.id);
+  console.log(`[WS] New connection: ${socket.id}`);
+  console.log(`[WS] Handshake:`, socket.handshake);
+  console.log(`[WS] Headers:`, socket.handshake.headers);
+  console.log(`[WS] Origin:`, socket.handshake.headers.origin);
 
   // client: socket.emit("play-sound", { soundId })
   // (also accepts legacy payloads like { roomId, soundId } or just "soundId")
@@ -97,8 +63,16 @@ io.on("connection", (socket) => {
     io.emit("play-sound", { soundId });
   });
 
-  socket.on("disconnect", () => {
-    console.log("client disconnected", socket.id);
+  socket.on("disconnect", (reason) => {
+    console.log(`[WS] Client disconnected: ${socket.id}, reason:`, reason);
+  });
+
+  socket.on("connect_error", (err) => {
+    console.log(`[WS] Connection error for ${socket.id}:`, err.message);
+  });
+
+  socket.on("error", (err) => {
+    console.log(`[WS] Socket error for ${socket.id}:`, err.message);
   });
 
   socket.on("start-voice", () => {
@@ -253,8 +227,13 @@ process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
 
 // Start server
+httpServer.on("error", (err) => {
+  console.log("[WS] Server error:", err.message);
+  console.log("[WS] Error code:", err.code);
+});
+
 httpServer.listen(PORT, async () => {
-  console.log(`WebSocket server listening on :${PORT}`);
+  console.log(`[WS] Server listening on :${PORT}`);
 
   if (USE_NGROK) {
     try {

@@ -84,10 +84,16 @@ export const useWebSocket = (options?: UseWebSocketOptions): UseWebSocketReturn 
   }, []);
 
   const connectSocket = useCallback(() => {
+    console.log("[WS Client] connectSocket called, URL:", wsUrl);
+    console.log("[WS Client] outputMode:", options?.outputMode, "role:", options?.role);
     if (typeof window === "undefined") return;
     const url = wsUrl.trim();
-    if (!url) return;
+    if (!url) {
+      console.log("[WS Client] No URL configured, skipping connection");
+      return;
+    }
 
+    console.log("[WS Client] Attempting to connect to:", url);
     setLastError(null);
     setConnectionStatus("connecting");
 
@@ -100,20 +106,30 @@ export const useWebSocket = (options?: UseWebSocketOptions): UseWebSocketReturn 
       reconnectionDelayMax: WS_RECONNECTION_DELAY_MAX,
     });
 
+    console.log("[WS Client] Socket instance created, id:", s.id);
+
     setSocket(s);
 
     s.on("connect", () => {
+      console.log("[WS Client] Connected! Socket id:", s.id);
       setConnectionStatus("connected");
     });
 
     s.on("connect_error", (err) => {
+      console.log("[WS Client] Connect error:", err.message);
+      console.log("[WS Client] Error type:", err.name);
       setConnectionStatus("error");
       setLastError(err?.message || "connect_error");
     });
 
     s.on("disconnect", (reason) => {
+      console.log("[WS Client] Disconnected, reason:", reason);
       setConnectionStatus("disconnected");
       setLastError(reason || null);
+    });
+
+    s.on("error", (err) => {
+      console.log("[WS Client] Socket error:", err);
     });
 
     s.on("error-message", ({ message }: { message: string }) => {
@@ -147,7 +163,10 @@ export const useWebSocket = (options?: UseWebSocketOptions): UseWebSocketReturn 
     if (!mounted) return;
     if (typeof window === "undefined") return;
 
+    console.log("[WS Client] useEffect triggered, outputMode:", outputMode, "role:", role, "wsUrl:", wsUrl);
+
     const shouldConnect = outputMode === "server" || role === "player";
+    console.log("[WS Client] shouldConnect:", shouldConnect);
     if (!shouldConnect) {
       setConnectionStatus("idle");
       setLastError(null);

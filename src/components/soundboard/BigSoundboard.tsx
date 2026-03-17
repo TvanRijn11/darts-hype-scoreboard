@@ -33,7 +33,7 @@ export const BigSoundboard: React.FC = () => {
     isConnected,
   } = useWebSocket({ role, outputMode: talkMode ? "server" : outputMode === "client" ? "client" : "server", playbackTarget });
 
-  const canUseServer = connectionStatus !== "idle";
+  const canUseServer = true;
 
   React.useEffect(() => {
     setMounted(true);
