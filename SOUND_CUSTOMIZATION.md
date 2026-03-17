@@ -1,77 +1,83 @@
 # Sound Customization Guide
 
-## How to Add Custom Sounds
+## Overview
 
-The Darts Hype Scoreboard now supports playing custom audio files! Here's how to customize the sounds:
+All sounds are now configured in a single file: `sounds.json`. This makes it easy to add, remove, or modify sounds without editing multiple files.
 
-### Option 1: Use Local Files (Recommended for Development)
+## Quick Start
 
-1. Create a `public/sounds/` directory in your project:
+### Adding a New Sound
 
-   ```bash
-   mkdir -p public/sounds
-   ```
-
-2. Add your audio files:
-
-   **Game Sounds (auto-play):**
-   - `180.mp3` - Sound for 180 points
-   - `bust.mp3` - Sound for busting
-   - `winner.mp3` - Sound for winning
-
-   **Soundboard Sounds (manual triggers):**
-   - `cheer.mp3` - Crowd cheer sound
-   - `goodshot.mp3` - Good shot commentary
-   - `fantastic.mp3` - Fantastic shot commentary
-   - `wow.mp3` - Wow reaction sound
-   - `shame.mp3` - Shame/oh no reaction
-
-3. Sounds are automatically configured in `lib/soundConfig.ts`:
-
-   ```typescript
-   export const initializeSounds = (): void => {
-     setSoundURL("180", "/sounds/180.mp3");
-     setSoundURL("bust", "/sounds/bust.mp3");
-     setSoundURL("winner", "/sounds/winner.mp3");
-     setSoundURL("cheer", "/sounds/cheer.mp3");
-     setSoundURL("goodshot", "/sounds/goodshot.mp3");
-     setSoundURL("fantastic", "/sounds/fantastic.mp3");
-     setSoundURL("wow", "/sounds/wow.mp3");
-     setSoundURL("shame", "/sounds/shame.mp3");
-   };
-   ```
-
-4. The app automatically calls `initializeSounds()` on startup
-
-### Option 2: Use Hosted Audio Files
-
-Use any publicly accessible audio file URL:
-
-```typescript
-setSoundURL("180", "https://your-cdn.com/sounds/180.mp3");
-setSoundURL("bust", "https://your-cdn.com/sounds/bust.mp3");
-setSoundURL("winner", "https://your-cdn.com/sounds/winner.mp3");
-setSoundURL("cheer", "https://your-cdn.com/sounds/cheer.mp3");
+**Option 1: Interactive CLI (Recommended)**
+```bash
+npm run add:sound
 ```
 
-### Option 3: Embed Audio from myinstants.com
+This will prompt you for:
+- Sound ID (e.g., "my-awesome-sound")
+- Filename in `public/sounds/` (e.g., "my-awesome-sound.mp3")
+- Category (game or soundboard)
+- Description (optional)
 
-To use sounds from myinstants.com:
+**Option 2: Manual Edit**
 
-1. Find a sound you like on [myinstants.com](https://www.myinstants.com)
-2. Right-click on the play button and inspect the audio element
-3. Copy the audio file URL
-4. Add it to `lib/soundConfig.ts`
-
-Example:
-
-```typescript
-setSoundURL("180", "https://path-to-myinstants-audio.mp3");
+1. Add the sound to `sounds.json`:
+```json
+{
+  "sounds": {
+    "my-sound": {
+      "file": "my-sound.mp3",
+      "category": "soundboard",
+      "description": "My custom sound"
+    }
+  }
+}
 ```
+
+2. Place your audio file in `public/sounds/my-sound.mp3`
+
+3. Regenerate the types:
+```bash
+npm run generate:sounds
+```
+
+## Sound Configuration
+
+Each sound in `sounds.json` has these properties:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `file` | string | Filename in `public/sounds/` |
+| `category` | string | "game" (auto-play) or "soundboard" (manual) |
+| `description` | string | Optional description |
+| `customUrl` | string | Optional override URL (for CDN hosting) |
+
+### Categories
+
+- **game**: Sounds triggered automatically by game events (180, winners, etc.)
+- **soundboard**: Sounds triggered manually from the soundboard UI
+
+## Using Custom Audio URLs
+
+To use hosted audio files instead of local files, add a `customUrl` property:
+
+```json
+{
+  "sounds": {
+    "180": {
+      "file": "180.mp3",
+      "category": "game",
+      "customUrl": "https://your-cdn.com/sounds/180.mp3"
+    }
+  }
+}
+```
+
+The `customUrl` takes precedence over the local `file`.
 
 ## Supported Audio Formats
 
-- MP3
+- MP3 (recommended)
 - WAV
 - OGG
 - FLAC
@@ -79,29 +85,52 @@ setSoundURL("180", "https://path-to-myinstants-audio.mp3");
 
 ## Fallback Behavior
 
-If an audio file fails to load or play, the app will automatically fall back to Web Speech Synthesis (text-to-speech), so the app will always produce sounds!
+If an audio file fails to load or play, the app automatically falls back to Web Speech Synthesis (text-to-speech).
 
-## Testing
+## Regenerating Types
 
-1. Start the development server: `npm run dev`
-2. Open the Soundboard section
-3. Click any sound button to test
-4. Check browser console for any loading errors
+After editing `sounds.json`, run:
+
+```bash
+npm run generate:sounds
+```
+
+This generates:
+- `types/sounds.ts` - TypeScript types and URLs for the frontend
+- `server/sounds.js` - CommonJS module for the WebSocket server
+
+## Directory Structure
+
+```
+project/
+├── sounds.json              # Single source of truth for sound config
+├── public/
+│   └── sounds/             # Audio files go here
+│       ├── 180.mp3
+│       ├── trap.mp3
+│       └── ...
+├── types/
+│   └── sounds.ts           # Auto-generated
+├── server/
+│   └── sounds.js           # Auto-generated
+└── lib/
+    └── sounds.ts           # Uses generated types
+```
 
 ## Troubleshooting
 
 **Sound not playing?**
+- Verify the file exists in `public/sounds/`
+- Check browser console for errors
+- Ensure you've run `npm run generate:sounds`
 
-- Check that the audio file URL is correct and publicly accessible
-- Verify the audio format is supported
-- Check browser console for CORS errors
-- The fallback text-to-speech will activate automatically
+**Changes not showing?**
+- Restart the dev server: `npm run dev`
+- Make sure to run `npm run generate:sounds` after editing `sounds.json`
 
 **CORS Issues?**
-
-- Make sure your audio hosting allows cross-origin requests
-- Use a CORS proxy if needed (last resort)
-- Host files locally in the `public/` folder
+- Use local files in `public/sounds/`
+- Or use a CDN that allows cross-origin requests
 
 ## Free Audio Resources
 

@@ -1,0 +1,182 @@
+{
+  "$schema": "./schemas/sounds.json",
+  "sounds": {
+    "67": {
+      "file": "67.mp3",
+      "category": "game",
+      "label": "67",
+      "description": "Game sound effect"
+    },
+    "180": {
+      "file": "180.mp3",
+      "category": "game",
+      "label": "180!",
+      "description": "Played when a player scores 180"
+    },
+    "indian-song": {
+      "file": "indian-song.mp3",
+      "category": "soundboard",
+      "label": "INDIAN SONG",
+      "description": "Soundboard sound"
+    },
+    "luke-the-nuke": {
+      "file": "luke-the-nuke.mp3",
+      "category": "soundboard",
+      "label": "LUKE THE NUKE",
+      "description": "Soundboard sound"
+    },
+    "seven nation army": {
+      "file": "seven-nation-army.mp3",
+      "category": "soundboard",
+      "label": "SEVEN NATION ARMY",
+      "description": "Soundboard sound"
+    },
+    "kip": {
+      "file": "kip.mp3",
+      "category": "soundboard",
+      "label": "KIP!",
+      "description": "Soundboard sound"
+    },
+    "messi": {
+      "file": "messi.mp3",
+      "category": "soundboard",
+      "label": "MESSI!",
+      "description": "Soundboard sound"
+    },
+    "trap": {
+      "file": "trap.mp3",
+      "category": "game",
+      "label": "TRAP!",
+      "description": "Winner sound"
+    },
+    "brainrot": {
+      "file": "brainrot.mp3",
+      "category": "soundboard",
+      "label": "BRAINROT!",
+      "description": "Soundboard sound"
+    },
+    "fbi": {
+      "file": "fbi.mp3",
+      "category": "soundboard",
+      "label": "FBI OPEN UP!",
+      "description": "Soundboard sound"
+    },
+    "granny": {
+      "file": "granny.mp3",
+      "category": "soundboard",
+      "label": "GRANNY!",
+      "description": "Soundboard sound"
+    },
+    "hema": {
+      "file": "hema.mp3",
+      "category": "soundboard",
+      "label": "HEMA!",
+      "description": "Soundboard sound"
+    },
+    "poepen": {
+      "file": "poepen.mp3",
+      "category": "soundboard",
+      "label": "POEPEN!",
+      "description": "Soundboard sound"
+    },
+    "scream": {
+      "file": "scream.mp3",
+      "category": "soundboard",
+      "label": "SCREAM!",
+      "description": "Soundboard sound"
+    },
+    "sinterklaasjournaal": {
+      "file": "sinterklaasjournaal.mp3",
+      "category": "soundboard",
+      "label": "SINTERKLAASJOURNAAL!",
+      "description": "Soundboard sound"
+    },
+    "spetterpoep": {
+      "file": "spetterpoep.mp3",
+      "category": "soundboard",
+      "label": "SPETTERPOEP!",
+      "description": "Soundboard sound"
+    },
+    "watermeloen": {
+      "file": "watermeloen.mp3",
+      "category": "soundboard",
+      "label": "WATERMELOEN!",
+      "description": "Soundboard sound"
+    },
+    "running": {
+      "file": "running.mp3",
+      "category": "soundboard",
+      "label": "RUNNING!",
+      "description": "Soundboard sound"
+    },
+    "angelo": {
+      "file": "angelo.mp3",
+      "category": "soundboard",
+      "label": "ANGELO!",
+      "description": "Soundboard sound"
+    },
+    "luchtalarm": {
+      "file": "luchtalarm.mp3",
+      "category": "soundboard",
+      "label": "LUCHTALARM!",
+      "description": "Soundboard sound"
+    },
+    "kale-dikke": {
+      "file": "kale-dikke.mp3",
+      "category": "soundboard",
+      "label": "KALE DIKKE!",
+      "description": "Soundboard sound"
+    },
+    "boef": {
+      "file": "boef-x-mooie-dag.mp3",
+      "category": "soundboard",
+      "label": "BOEF!",
+      "description": "Soundboard sound"
+    },
+    "dat-moet-jeniet-willen": {
+      "file": "dat-moet-jeniet-willen.mp3",
+      "category": "soundboard",
+      "label": "DAT MOET JE NIET WILLEN!",
+      "description": "Soundboard sound"
+    },
+    "ik-dacht-dat-dat-kon": {
+      "file": "ik-dacht-dat-dat-kon.mp3",
+      "category": "soundboard",
+      "label": "IK DACHT DAT DAT KON!",
+      "description": "Soundboard sound"
+    },
+    "joel": {
+      "file": "joel.mp3",
+      "category": "soundboard",
+      "label": "JOEL!",
+      "description": "Soundboard sound"
+    },
+    "noortje": {
+      "file": "noortje.mp3",
+      "category": "soundboard",
+      "label": "NOORTJE!",
+      "description": "Soundboard sound"
+    },
+    "wervelstorm": {
+      "file": "wervelstorm.mp3",
+      "category": "soundboard",
+      "label": "WERVELSTORM!",
+      "description": "Soundboard sound"
+    },
+    "scrub": {
+      "file": "scrub.mp3",
+      "category": "soundboard",
+      "description": "Soundboard sound"
+    }
+  },
+  "categories": {
+    "game": {
+      "label": "Game Sounds",
+      "description": "Sounds triggered by game events (180, winners, etc.)"
+    },
+    "soundboard": {
+      "label": "Soundboard",
+      "description": "Manual sound triggers from the soundboard"
+    }
+  }
+}

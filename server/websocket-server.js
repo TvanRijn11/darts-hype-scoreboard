@@ -5,6 +5,9 @@ const { spawn } = require("child_process");
 const express = require("express");
 const { Server } = require("socket.io");
 
+// Auto-generated sound paths from sounds.json
+const { SOUND_PATHS } = require("./sounds");
+
 const app = express();
 const httpServer = createServer(app);
 
@@ -25,37 +28,6 @@ const io = new Server(httpServer, {
     origin: parseAllowedOrigins(),
   },
 });
-
-// Map sound IDs to audio file paths relative to /public
-const SOUND_PATHS = {
-  '180': '/sounds/180.mp3',
-  '67': '/sounds/67.mp3',
-  'indian-song': '/sounds/indian-song.mp3',
-  'luke-the-nuke': '/sounds/luke-the-nuke.mp3',
-  'seven nation army': '/sounds/seven-nation-army.mp3',
-  'kip': '/sounds/kip.mp3',
-  'messi': '/sounds/messi.mp3',
-  'trap': '/sounds/trap.mp3',
-  'brainrot': '/sounds/brainrot.mp3',
-  'fbi': '/sounds/fbi.mp3',
-  'granny': '/sounds/granny.mp3',
-  'hema': '/sounds/hema.mp3',
-  'poepen': '/sounds/poepen.mp3',
-  'scream': '/sounds/scream.mp3',
-  'sinterklaasjournaal': '/sounds/sinterklaasjournaal.mp3',
-  'spetterpoep': '/sounds/spetterpoep.mp3',
-  'watermeloen': '/sounds/watermeloen.mp3',
-  'running': '/sounds/running.mp3',
-  'angelo': '/sounds/angelo.mp3',
-  'luchtalarm': '/sounds/luchtalarm.mp3',
-  'kale-dikke': '/sounds/kale-dikke.mp3',
-  'boef': '/sounds/boef-x-mooie-dag.mp3',
-  'dat-moet-jeniet-willen': '/sounds/dat-moet-jeniet-willen.mp3',
-  'ik-dacht-dat-dat-kon': '/sounds/ik-dacht-dat-dat-kon.mp3',
-  'joel': '/sounds/joel.mp3',
-  'noortje': '/sounds/noortje.mp3',
-  'wervelstorm': '/sounds/wervelstorm.mp3',
-};
 
 let currentAudioProcess = null;
 let voicePlayerProcess = null;
@@ -122,10 +94,8 @@ io.on("connection", (socket) => {
     console.log("Mic stream started");
 
     const command = "aplay";
-    // We add "-D bluealsa" for bluetooth, or "-D hw:1,0" or "-D plughw:CARD=Headphones"
-    // Let's try "default" first, then a specific hardware path
     const args = [
-      "-D", "plughw:2,0", // or try "plughw:CARD=Headphones,DEV=0"
+      "-D", "plughw:2,0",
       "-f", "S16_LE",
       "-r", "44100",
       "-c", "1",
@@ -134,10 +104,8 @@ io.on("connection", (socket) => {
     ];
 
     voicePlayerProcess = spawn(command, args);
-    // ... rest of your code
 
   voicePlayerProcess.stdin.on("error", (err) => {
-    // This catches the EPIPE so the server doesn't crash
     console.error("Stdin Error (usually voice stop):", err.message);
   });
 
@@ -147,19 +115,15 @@ io.on("connection", (socket) => {
 });
 
   socket.on("voice-data", (data) => {
-    // 1. Check if data actually exists
     if (!data) return;
 
     try {
-      // 2. Convert to Node.js Buffer (Socket.io usually sends a Buffer or ArrayBuffer)
       const audioBuffer = Buffer.from(data);
 
-      // 3. Debug: Only log every ~100th packet to see it's working without lag
       if (Math.random() > 0.99) {
         console.log(`Streaming ${audioBuffer.length} bytes to audio player...`);
       }
 
-      // 4. Write to the player's stdin
       if (voicePlayerProcess && voicePlayerProcess.stdin.writable) {
         voicePlayerProcess.stdin.write(audioBuffer);
       }
@@ -181,4 +145,3 @@ const PORT = process.env.WS_PORT || 4000;
 httpServer.listen(PORT, () => {
   console.log(`WebSocket server listening on :${PORT}`);
 });
-

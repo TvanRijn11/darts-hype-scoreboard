@@ -1,6 +1,6 @@
-import { BigSoundboard } from "@/components/BigSoundboard";
-import DartsGame from "@/components/DartsGame";
-import { Soundboard } from "@/components/Soundboard";
+import { BigSoundboard } from "@/src/components/soundboard/BigSoundboard";
+import DartsGame from "@/src/components/game/DartsGame";
+import { Soundboard } from "@/src/components/soundboard/Soundboard";
 
 export default function Home() {
   return (

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css"; // Global styles
-import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import ServiceWorkerRegistration from "@/src/components/ui/ServiceWorkerRegistration";
 import { Analytics } from "@vercel/analytics/react";
 
 export const metadata: Metadata = {

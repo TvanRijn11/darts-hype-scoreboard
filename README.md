@@ -1,19 +1,87 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+<img width="1200" height="475" alt="Darts Hype Scoreboard" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Darts Hype Scoreboard
 
-This contains everything you need to run your app locally.
+A hype scoreboard for darts with sound effects, commentary, and a soundboard.
 
-View your app in AI Studio: https://ai.studio/apps/80ac0d99-d4d2-4bb7-935b-d2494436f279
+## Features
 
-## Run Locally
+- **Game Modes**: 501, 301, Cricket
+- **Soundboard**: 27 built-in sound effects
+- **Audio Commentary**: Text-to-speech score announcement
+- **Remote Play**: WebSocket server for syncing sounds across devices
 
-**Prerequisites:** Node.js
+## Getting Started
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+### Prerequisites
+
+- Node.js 18+
+- npm
+
+### Installation
+
+```bash
+npm install
+```
+
+### Environment Variables
+
+Create a `.env.local` file with:
+
+```
+GEMINI_API_KEY=your_api_key_here
+```
+
+### Development
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000)
+
+### WebSocket Server
+
+For multi-device sound sync, run the WebSocket server:
+
+```bash
+npm run ws-server
+```
+
+The server runs on port 4000 by default. Set `WS_PORT` to customize.
+
+## Sound Management
+
+All sounds are configured in `sounds.json`. This single file defines:
+- Sound IDs and filenames
+- Categories (game/soundboard)
+- Custom URLs (for CDN hosting)
+
+### Adding a Sound
+
+**Interactive CLI:**
+```bash
+npm run add:sound
+```
+
+**Manual:**
+1. Add sound to `sounds.json`
+2. Place audio file in `public/sounds/`
+3. Run `npm run generate:sounds`
+
+See [SOUND_CUSTOMIZATION.md](SOUND_CUSTOMIZATION.md) for detailed documentation.
+
+## Tech Stack
+
+- Next.js 15
+- React 19
+- TypeScript
+- Tailwind CSS
+- Socket.io
+- Web Audio API
+
+## License
+
+MIT
