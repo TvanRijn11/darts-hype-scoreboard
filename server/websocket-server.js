@@ -98,6 +98,14 @@ socket.on("voice-data", (data) => {
 
 // Play sound on the server's audio output
 let currentAudioProcess = null;
+let currentSoundId = null;
+let currentSoundTimeout = null;
+
+// Broadcast current playing state to all clients
+function broadcastPlayingState(soundId = null) {
+  io.emit("sound-playing", { soundId });
+  currentSoundId = soundId;
+}
 
 // Get audio device from env or auto-detect
 const AUDIO_DEVICE = process.env.AUDIO_DEVICE || null;
@@ -136,9 +144,16 @@ function playSoundOnServer(soundId) {
     currentAudioProcess.kill("SIGKILL");
     currentAudioProcess = null;
   }
+  if (currentSoundTimeout) {
+    clearTimeout(currentSoundTimeout);
+    currentSoundTimeout = null;
+  }
 
   // Full path to sound file
   const fullPath = path.join(SOUNDS_DIR, path.basename(soundPath));
+
+  // Broadcast that we're playing
+  broadcastPlayingState(soundId);
 
   // Try ffplay first (handles MP3 better), fallback to aplay
   const useFFplay = true; // Set to false to use aplay
@@ -155,10 +170,16 @@ function playSoundOnServer(soundId) {
 
   currentAudioProcess.on("error", () => {
     currentAudioProcess = null;
+    broadcastPlayingState(null);
   });
 
   currentAudioProcess.on("close", () => {
     currentAudioProcess = null;
+    // Clear playing state after a short delay
+    currentSoundTimeout = setTimeout(() => {
+      broadcastPlayingState(null);
+      currentSoundTimeout = null;
+    }, 500);
   });
 }
 

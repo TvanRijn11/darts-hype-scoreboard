@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Volume2, Mic, MicOff, Wifi, WifiOff } from "lucide-react";
-import { SoundType, SOUNDS } from "@/src/types/sounds";
+import { SOUNDS, SoundType } from "@/src/types/sounds";
 import { playSound } from "@/src/lib/sounds/sounds";
 import { useWebSocket } from "@/src/hooks/useWebSocket";
 import { TalkButton } from "./TalkButton";
@@ -33,6 +33,7 @@ export const Soundboard: React.FC = () => {
     emitStopVoice,
     emitVoiceData,
     isConnected,
+    playingSound,
   } = useWebSocket({ role, outputMode: talkMode ? "server" : outputMode === "client" ? "client" : "server", playbackTarget, wsUrl });
 
   const canUseServer = true;
@@ -113,6 +114,15 @@ export const Soundboard: React.FC = () => {
           </h3>
         </div>
         <div className="flex items-center gap-2">
+          {/* Now playing on server */}
+          {playingSound && (
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-500/20 border border-emerald-500/50 rounded-full">
+              <Volume2 className="w-3 h-3 text-emerald-400 animate-pulse" />
+              <span className="text-emerald-400 text-xs font-medium">
+                {playingSound}
+              </span>
+            </div>
+          )}
           {/* Connection status */}
           <div className="flex items-center gap-1.5 text-xs">
             {isConnected ? (

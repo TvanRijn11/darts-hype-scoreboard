@@ -24,6 +24,7 @@ export interface UseWebSocketReturn {
   connectionStatus: ConnectionStatus;
   lastError: string | null;
   isConnected: boolean;
+  playingSound: SoundType | null;
   emitPlaySound: (soundId: SoundType) => void;
   emitStartVoice: () => void;
   emitStopVoice: () => void;
@@ -111,6 +112,22 @@ export const useWebSocket = (options?: UseWebSocketOptions): UseWebSocketReturn 
       }, WS_SERVER_PLAYING_TIMEOUT);
     });
 
+    // Listen for server's sound-playing state
+    s.on("sound-playing", ({ soundId }: { soundId: SoundType | null }) => {
+      if (serverPlayingTimeoutRef.current) {
+        window.clearTimeout(serverPlayingTimeoutRef.current);
+        serverPlayingTimeoutRef.current = null;
+      }
+      setPlayingSound(soundId);
+      if (soundId) {
+        // Clear after reasonable duration (sounds are typically <10s)
+        serverPlayingTimeoutRef.current = window.setTimeout(() => {
+          setPlayingSound(null);
+          serverPlayingTimeoutRef.current = null;
+        }, 8000);
+      }
+    });
+
     return s;
   }, [wsUrl, playbackTarget, role]);
 
@@ -187,6 +204,7 @@ export const useWebSocket = (options?: UseWebSocketOptions): UseWebSocketReturn 
     connectionStatus,
     lastError,
     isConnected: connectionStatus === "connected",
+    playingSound,
     emitPlaySound,
     emitStartVoice,
     emitStopVoice,

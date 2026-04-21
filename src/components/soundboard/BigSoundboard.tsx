@@ -31,6 +31,7 @@ export const BigSoundboard: React.FC = () => {
     emitStopVoice,
     emitVoiceData,
     isConnected,
+    playingSound,
   } = useWebSocket({ role, outputMode: talkMode ? "server" : outputMode === "client" ? "client" : "server", playbackTarget });
 
   const canUseServer = true;
@@ -97,29 +98,40 @@ export const BigSoundboard: React.FC = () => {
             Hype Soundboard
           </h3>
         </div>
-        {/* Connection status */}
-        <div className="flex items-center gap-1.5 text-xs">
-          {isConnected ? (
-            <>
-              <Wifi className="w-4 h-4 text-green-400" />
-              <span className="text-green-400">Connected</span>
-            </>
-          ) : connectionStatus === "connecting" ? (
-            <>
-              <Wifi className="w-4 h-4 text-yellow-400 animate-pulse" />
-              <span className="text-yellow-400">Connecting...</span>
-            </>
-          ) : connectionStatus === "error" ? (
-            <>
-              <WifiOff className="w-4 h-4 text-red-400" />
-              <span className="text-red-400">Error</span>
-            </>
-          ) : (
-            <>
-              <WifiOff className="w-4 h-4 text-zinc-500" />
-              <span className="text-zinc-500">Offline</span>
-            </>
+        <div className="flex items-center gap-3">
+          {/* Now playing on server */}
+          {playingSound && (
+            <div className="flex items-center gap-1.5 px-2 py-1 bg-emerald-500/20 border border-emerald-500/50 rounded-full">
+              <Volume2 className="w-3 h-3 text-emerald-400 animate-pulse" />
+              <span className="text-emerald-400 text-xs font-medium">
+                {playingSound}
+              </span>
+            </div>
           )}
+          {/* Connection status */}
+          <div className="flex items-center gap-1.5 text-xs">
+            {isConnected ? (
+              <>
+                <Wifi className="w-4 h-4 text-green-400" />
+                <span className="text-green-400">Connected</span>
+              </>
+            ) : connectionStatus === "connecting" ? (
+              <>
+                <Wifi className="w-4 h-4 text-yellow-400 animate-pulse" />
+                <span className="text-yellow-400">Connecting...</span>
+              </>
+            ) : connectionStatus === "error" ? (
+              <>
+                <WifiOff className="w-4 h-4 text-red-400" />
+                <span className="text-red-400">Error</span>
+              </>
+            ) : (
+              <>
+                <WifiOff className="w-4 h-4 text-zinc-500" />
+                <span className="text-zinc-500">Offline</span>
+              </>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex justify-center mb-4 gap-2 text-xs">
