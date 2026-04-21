@@ -128,6 +128,36 @@ io.on("connection", (socket) => {
 // Play sound on the server's audio output
 let currentAudioProcess = null;
 
+// Get audio device from env or auto-detect
+const AUDIO_DEVICE = process.env.AUDIO_DEVICE || null;
+
+// Detect correct sounds directory
+function getSoundsDir() {
+  // Try common locations
+  const possiblePaths = [
+    process.env.SOUNDS_DIR || "",
+    path.join(__dirname, "..", "public", "sounds"),
+    path.join(__dirname, "..", "..", "public", "sounds"),
+    "/home/pi/darts-hype-scoreboard/public/sounds",
+    "/root/darts-hype-scoreboard/public/sounds",
+  ];
+
+  for (const dir of possiblePaths) {
+    if (dir && require("fs").existsSync(dir)) {
+      return dir;
+    }
+  }
+
+  // Fallback to __dirname parent
+  return path.join(__dirname, "..", "public", "sounds");
+}
+
+const SOUNDS_DIR = getSoundsDir();
+console.log(`[WS] Sounds directory: ${SOUNDS_DIR}`);
+if (AUDIO_DEVICE) {
+  console.log(`[WS] Audio device: ${AUDIO_DEVICE}`);
+}
+
 function playSoundOnServer(soundId) {
   const soundPath = SOUND_PATHS[soundId];
   if (!soundPath) {
@@ -142,11 +172,21 @@ function playSoundOnServer(soundId) {
   }
 
   // Full path to sound file
-  const fullPath = path.join(__dirname, "..", "public", soundPath);
+  const fullPath = path.join(SOUNDS_DIR, path.basename(soundPath));
   console.log(`[WS] Playing sound: ${fullPath}`);
 
-  // Play using aplay (ALSA)
-  currentAudioProcess = spawn("aplay", [fullPath]);
+  // Try ffplay first (handles MP3 better), fallback to aplay
+  const useFFplay = true; // Set to false to use aplay
+
+  if (useFFplay) {
+    // Use ffplay - nodisp (no video), autoexit (close when done)
+    const ffplayArgs = ["-nodisp", "-autoexit", "-volume", "150", fullPath];
+    currentAudioProcess = spawn("ffplay", ffplayArgs);
+  } else {
+    // Build aplay command with optional device
+    const aplayArgs = AUDIO_DEVICE ? ["-D", AUDIO_DEVICE, fullPath] : [fullPath];
+    currentAudioProcess = spawn("aplay", aplayArgs);
+  }
 
   currentAudioProcess.on("error", (err) => {
     console.log(`[WS] Error playing sound ${soundId}:`, err.message);

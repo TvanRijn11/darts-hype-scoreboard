@@ -1,10 +1,11 @@
 "use client";
 
 import React from "react";
-import { Volume2 } from "lucide-react";
+import { Volume2, Mic, MicOff, Wifi, WifiOff } from "lucide-react";
 import { SoundType, SOUNDS } from "@/src/types/sounds";
 import { playSound } from "@/src/lib/sounds/sounds";
 import { useWebSocket } from "@/src/hooks/useWebSocket";
+import { TalkButton } from "./TalkButton";
 
 type OutputMode = "client" | "server";
 type Role = "controller" | "player";
@@ -22,11 +23,17 @@ export const Soundboard: React.FC = () => {
     React.useState<PlaybackTarget>("device");
   const [wsUrl, setWsUrl] = React.useState<string>("");
 
-  const { 
-    connectionStatus, 
-    emitPlaySound, 
-    isConnected 
-  } = useWebSocket({ role, outputMode, playbackTarget, wsUrl });
+  const [talkMode, setTalkMode] = React.useState(false);
+
+  const {
+    socket,
+    connectionStatus,
+    emitPlaySound,
+    emitStartVoice,
+    emitStopVoice,
+    emitVoiceData,
+    isConnected,
+  } = useWebSocket({ role, outputMode: talkMode ? "server" : outputMode === "client" ? "client" : "server", playbackTarget, wsUrl });
 
   const canUseServer = true;
 
@@ -97,6 +104,41 @@ export const Soundboard: React.FC = () => {
           <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest">
             Hype Soundboard
           </h3>
+        </div>
+        <div className="flex items-center gap-2">
+          {/* Connection status */}
+          <div className="flex items-center gap-1.5 text-xs">
+            {isConnected ? (
+              <>
+                <Wifi className="w-4 h-4 text-green-400" />
+                <span className="text-green-400">Connected</span>
+              </>
+            ) : connectionStatus === "connecting" ? (
+              <>
+                <Wifi className="w-4 h-4 text-yellow-400 animate-pulse" />
+                <span className="text-yellow-400">Connecting...</span>
+              </>
+            ) : connectionStatus === "error" ? (
+              <>
+                <WifiOff className="w-4 h-4 text-red-400" />
+                <span className="text-red-400">Error</span>
+              </>
+            ) : (
+              <>
+                <WifiOff className="w-4 h-4 text-zinc-500" />
+                <span className="text-zinc-500">Offline</span>
+              </>
+            )}
+          </div>
+          {/* Talk button - only show when connected to server */}
+          {outputMode === "server" && isConnected && (
+            <TalkButton
+              onStartVoice={() => { setTalkMode(true); emitStartVoice(); }}
+              onStopVoice={() => { setTalkMode(false); emitStopVoice(); }}
+              onVoiceData={emitVoiceData}
+              socketConnected={isConnected}
+            />
+          )}
         </div>
       </div>
       <div className="flex justify-center mb-4 gap-2 text-xs">
