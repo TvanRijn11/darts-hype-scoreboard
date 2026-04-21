@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Volume2 } from "lucide-react";
+import { Volume2, Wifi, WifiOff } from "lucide-react";
 import { SoundType, SOUNDS } from "@/src/types/sounds";
 import { playSound } from "@/src/lib/sounds/sounds";
 import { useWebSocket } from "@/src/hooks/useWebSocket";
@@ -96,6 +96,30 @@ export const BigSoundboard: React.FC = () => {
           <h3 className="text-sm font-bold text-zinc-500 uppercase tracking-widest">
             Hype Soundboard
           </h3>
+        </div>
+        {/* Connection status */}
+        <div className="flex items-center gap-1.5 text-xs">
+          {isConnected ? (
+            <>
+              <Wifi className="w-4 h-4 text-green-400" />
+              <span className="text-green-400">Connected</span>
+            </>
+          ) : connectionStatus === "connecting" ? (
+            <>
+              <Wifi className="w-4 h-4 text-yellow-400 animate-pulse" />
+              <span className="text-yellow-400">Connecting...</span>
+            </>
+          ) : connectionStatus === "error" ? (
+            <>
+              <WifiOff className="w-4 h-4 text-red-400" />
+              <span className="text-red-400">Error</span>
+            </>
+          ) : (
+            <>
+              <WifiOff className="w-4 h-4 text-zinc-500" />
+              <span className="text-zinc-500">Offline</span>
+            </>
+          )}
         </div>
       </div>
       <div className="flex justify-center mb-4 gap-2 text-xs">

@@ -37,6 +37,13 @@ export const Soundboard: React.FC = () => {
 
   const canUseServer = true;
 
+  // Store connection status in localStorage for Header to read
+  React.useEffect(() => {
+    try {
+      window.localStorage.setItem("darts.connectionStatus", connectionStatus);
+    } catch {}
+  }, [connectionStatus]);
+
   React.useEffect(() => {
     setMounted(true);
     if (typeof window === "undefined") return;
