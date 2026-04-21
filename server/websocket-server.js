@@ -26,7 +26,6 @@ const parseAllowedOrigins = () => {
 
 const corsOrigins = parseAllowedOrigins();
 console.log("[WS] CORS origins configured:", corsOrigins);
-console.log("[WS] Server starting on port:", PORT);
 
 const io = new Server(httpServer, {
   cors: {
