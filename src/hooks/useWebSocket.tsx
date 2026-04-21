@@ -16,6 +16,7 @@ export interface UseWebSocketOptions {
   role?: "controller" | "player";
   outputMode?: "client" | "server";
   playbackTarget?: "device" | "server";
+  wsUrl?: string;
 }
 
 export interface UseWebSocketReturn {
@@ -38,54 +39,19 @@ export const useWebSocket = (options?: UseWebSocketOptions): UseWebSocketReturn 
   const serverPlayingTimeoutRef = useRef<number | null>(null);
 
   const [mounted, setMounted] = useState(false);
-  const [wsUrl, setWsUrl] = useState<string>(WS_URL);
-  const [role, setRole] = useState<"controller" | "player">(
-    options?.role ?? "controller"
-  );
-  const [outputMode, setOutputMode] = useState<"client" | "server">(
-    options?.outputMode ?? "client"
-  );
-  const [playbackTarget, setPlaybackTarget] = useState<"device" | "server">(
-    options?.playbackTarget ?? "device"
-  );
+
+  // Get values from options or fall back to env/localStorage
+  const wsUrl = options?.wsUrl || WS_URL;
+  const role = options?.role || "controller";
+  const outputMode = options?.outputMode || "client";
+  const playbackTarget = options?.playbackTarget || "device";
 
   useEffect(() => {
     setMounted(true);
-    if (typeof window === "undefined") return;
-
-    const params = new URLSearchParams(window.location.search);
-    const qRole = params.get("role");
-    const qMode = params.get("mode");
-    const qPlayback = params.get("playback");
-    const qWs = params.get("ws");
-
-    if (qRole === "controller" || qRole === "player") setRole(qRole);
-    if (qMode === "client" || qMode === "server") setOutputMode(qMode);
-    if (qPlayback === "device" || qPlayback === "server")
-      setPlaybackTarget(qPlayback);
-    if (typeof qWs === "string" && qWs.trim()) setWsUrl(qWs.trim());
-
-    try {
-      const lsRole = window.localStorage.getItem("darts.role");
-      const lsMode = window.localStorage.getItem("darts.outputMode");
-      const lsPlayback = window.localStorage.getItem("darts.playbackTarget");
-      const lsWs = window.localStorage.getItem("darts.wsUrl");
-
-      if (!qRole && (lsRole === "controller" || lsRole === "player"))
-        setRole(lsRole);
-      if (!qMode && (lsMode === "client" || lsMode === "server"))
-        setOutputMode(lsMode);
-      if (!qPlayback && (lsPlayback === "device" || lsPlayback === "server"))
-        setPlaybackTarget(lsPlayback);
-      if (!qWs && lsWs) setWsUrl(lsWs);
-    } catch {
-      // ignore
-    }
   }, []);
 
   const connectSocket = useCallback(() => {
-    console.log("[WS Client] connectSocket called, URL:", wsUrl);
-    console.log("[WS Client] outputMode:", options?.outputMode, "role:", options?.role);
+    console.log("[WS Client] connectSocket called, wsUrl:", wsUrl, "outputMode:", outputMode);
     if (typeof window === "undefined") return;
     const url = wsUrl.trim();
     if (!url) {
@@ -190,7 +156,7 @@ export const useWebSocket = (options?: UseWebSocketOptions): UseWebSocketReturn 
       }
       if (s) s.disconnect();
     };
-  }, [mounted, outputMode, role, wsUrl, playbackTarget, connectSocket, socket]);
+  }, [mounted, outputMode, role, wsUrl, playbackTarget, connectSocket]);
 
   useEffect(() => {
     if (!mounted) return;

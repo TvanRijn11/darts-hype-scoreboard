@@ -125,6 +125,39 @@ io.on("connection", (socket) => {
   });
 });
 
+// Play sound on the server's audio output
+let currentAudioProcess = null;
+
+function playSoundOnServer(soundId) {
+  const soundPath = SOUND_PATHS[soundId];
+  if (!soundPath) {
+    console.log(`[WS] Sound not found: ${soundId}`);
+    return;
+  }
+
+  // Kill any currently playing sound
+  if (currentAudioProcess) {
+    currentAudioProcess.kill("SIGKILL");
+    currentAudioProcess = null;
+  }
+
+  // Full path to sound file
+  const fullPath = path.join(__dirname, "..", "public", soundPath);
+  console.log(`[WS] Playing sound: ${fullPath}`);
+
+  // Play using aplay (ALSA)
+  currentAudioProcess = spawn("aplay", [fullPath]);
+
+  currentAudioProcess.on("error", (err) => {
+    console.log(`[WS] Error playing sound ${soundId}:`, err.message);
+    currentAudioProcess = null;
+  });
+
+  currentAudioProcess.on("close", (code) => {
+    currentAudioProcess = null;
+  });
+}
+
 const PORT = process.env.WS_PORT || 4000;
 const USE_NGROK = process.env.USE_NGROK === "true";
 let ngrokProcess = null;

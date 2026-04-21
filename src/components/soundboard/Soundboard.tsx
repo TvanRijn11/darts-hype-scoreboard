@@ -20,12 +20,13 @@ export const Soundboard: React.FC = () => {
   const [outputMode, setOutputMode] = React.useState<OutputMode>("client");
   const [playbackTarget, setPlaybackTarget] =
     React.useState<PlaybackTarget>("device");
+  const [wsUrl, setWsUrl] = React.useState<string>("");
 
   const { 
     connectionStatus, 
     emitPlaySound, 
     isConnected 
-  } = useWebSocket({ role, outputMode, playbackTarget });
+  } = useWebSocket({ role, outputMode, playbackTarget, wsUrl });
 
   const canUseServer = true;
 
@@ -37,16 +38,19 @@ export const Soundboard: React.FC = () => {
     const qRole = params.get("role");
     const qMode = params.get("mode");
     const qPlayback = params.get("playback");
+    const qWs = params.get("ws");
 
     if (qRole === "controller" || qRole === "player") setRole(qRole);
     if (qMode === "client" || qMode === "server") setOutputMode(qMode);
     if (qPlayback === "device" || qPlayback === "server")
       setPlaybackTarget(qPlayback);
+    if (typeof qWs === "string" && qWs.trim()) setWsUrl(qWs.trim());
 
     try {
       const lsRole = window.localStorage.getItem("darts.role");
       const lsMode = window.localStorage.getItem("darts.outputMode");
       const lsPlayback = window.localStorage.getItem("darts.playbackTarget");
+      const lsWs = window.localStorage.getItem("darts.wsUrl");
 
       if (!qRole && (lsRole === "controller" || lsRole === "player"))
         setRole(lsRole);
@@ -54,6 +58,7 @@ export const Soundboard: React.FC = () => {
         setOutputMode(lsMode);
       if (!qPlayback && (lsPlayback === "device" || lsPlayback === "server"))
         setPlaybackTarget(lsPlayback);
+      if (!qWs && lsWs) setWsUrl(lsWs);
     } catch {
       // ignore
     }
@@ -110,12 +115,23 @@ export const Soundboard: React.FC = () => {
           type="button"
           disabled={!canUseServer}
           onClick={() => setOutputMode("server")}
-          className={`px-3 py-1 rounded-full border text-xs font-medium transition disabled:opacity-50 disabled:cursor-not-allowed ${
+          className={`px-3 py-1 rounded-full border text-xs font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 ${
             outputMode === "server"
               ? "bg-emerald-500 text-black border-emerald-400"
               : "bg-zinc-900 text-zinc-400 border-zinc-700 hover:bg-zinc-800"
           }`}
         >
+          <span
+            className={`w-2 h-2 rounded-full ${
+              isConnected
+                ? "bg-green-400"
+                : connectionStatus === "connecting"
+                ? "bg-yellow-400 animate-pulse"
+                : connectionStatus === "error" || connectionStatus === "disconnected"
+                ? "bg-red-400"
+                : "bg-zinc-500"
+            }`}
+          />
           Remote player
         </button>
       </div>

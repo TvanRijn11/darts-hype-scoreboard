@@ -52,6 +52,14 @@ npm run ws-server
 
 The server runs on port 4000 by default. Set `WS_PORT` to customize.
 
+For remote access via ngrok tunnel:
+
+```bash
+npm run ws-server:ngrok
+```
+
+See [Server Setup](SERVER_SETUP.md) for Raspberry Pi deployment instructions.
+
 ## Sound Management
 
 All sounds are configured in `sounds.json`. This single file defines:
@@ -81,6 +89,12 @@ See [SOUND_CUSTOMIZATION.md](SOUND_CUSTOMIZATION.md) for detailed documentation.
 - Tailwind CSS
 - Socket.io
 - Web Audio API
+
+## Documentation
+
+- [Sound Customization](SOUND_CUSTOMIZATION.md) - Adding and managing sounds
+- [Server Setup](SERVER_SETUP.md) - Running the WebSocket server on Raspberry Pi
+- [Remote Play](REMOTE_PLAY.md) - Multi-device configuration and connection modes
 
 ## License
 
