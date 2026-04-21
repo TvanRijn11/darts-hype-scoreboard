@@ -25,7 +25,6 @@ const parseAllowedOrigins = () => {
 };
 
 const corsOrigins = parseAllowedOrigins();
-console.log("[WS] CORS origins configured:", corsOrigins);
 
 const io = new Server(httpServer, {
   cors: {
@@ -40,20 +39,11 @@ const io = new Server(httpServer, {
   pingInterval: 25000,
 });
 
-// Log all connection attempts
 io.on("connection", (socket) => {
-  console.log(`[WS] New connection: ${socket.id}`);
-  console.log(`[WS] Handshake:`, socket.handshake);
-  console.log(`[WS] Headers:`, socket.handshake.headers);
-  console.log(`[WS] Origin:`, socket.handshake.headers.origin);
-
-  // client: socket.emit("play-sound", { soundId })
-  // (also accepts legacy payloads like { roomId, soundId } or just "soundId")
   socket.on("play-sound", (payload) => {
     const soundId =
       typeof payload === "string" ? payload : payload && payload.soundId;
     if (!soundId) return;
-    console.log(`play-sound ${soundId}`);
 
     // Play sound on the server machine
     playSoundOnServer(soundId);
@@ -62,21 +52,7 @@ io.on("connection", (socket) => {
     io.emit("play-sound", { soundId });
   });
 
-  socket.on("disconnect", (reason) => {
-    console.log(`[WS] Client disconnected: ${socket.id}, reason:`, reason);
-  });
-
-  socket.on("connect_error", (err) => {
-    console.log(`[WS] Connection error for ${socket.id}:`, err.message);
-  });
-
-  socket.on("error", (err) => {
-    console.log(`[WS] Socket error for ${socket.id}:`, err.message);
-  });
-
   socket.on("start-voice", () => {
-    console.log("Mic stream started");
-
     const command = "aplay";
     const args = [
       "-D", "plughw:2,0",
@@ -89,35 +65,30 @@ io.on("connection", (socket) => {
 
     voicePlayerProcess = spawn(command, args);
 
-  voicePlayerProcess.stdin.on("error", (err) => {
-    console.error("Stdin Error (usually voice stop):", err.message);
+  voicePlayerProcess.stdin.on("error", () => {
+    // Stdin error (usually voice stop)
   });
 
   voicePlayerProcess.on("error", (err) => {
-    console.error("Failed to start aplay. Is it installed?", err.message);
+    // Failed to start aplay
   });
 });
 
-  socket.on("voice-data", (data) => {
+socket.on("voice-data", (data) => {
     if (!data) return;
 
     try {
       const audioBuffer = Buffer.from(data);
 
-      if (Math.random() > 0.99) {
-        console.log(`Streaming ${audioBuffer.length} bytes to audio player...`);
-      }
-
       if (voicePlayerProcess && voicePlayerProcess.stdin.writable) {
         voicePlayerProcess.stdin.write(audioBuffer);
       }
-    } catch (err) {
-      console.error("Error processing voice-data:", err);
+    } catch {
+      // Error processing voice data
     }
   });
 
   socket.on("stop-voice", () => {
-    console.log("Mic stream stopped");
     if (voicePlayerProcess) {
       voicePlayerProcess.kill();
       voicePlayerProcess = null;
@@ -153,15 +124,10 @@ function getSoundsDir() {
 }
 
 const SOUNDS_DIR = getSoundsDir();
-console.log(`[WS] Sounds directory: ${SOUNDS_DIR}`);
-if (AUDIO_DEVICE) {
-  console.log(`[WS] Audio device: ${AUDIO_DEVICE}`);
-}
 
 function playSoundOnServer(soundId) {
   const soundPath = SOUND_PATHS[soundId];
   if (!soundPath) {
-    console.log(`[WS] Sound not found: ${soundId}`);
     return;
   }
 
@@ -173,7 +139,6 @@ function playSoundOnServer(soundId) {
 
   // Full path to sound file
   const fullPath = path.join(SOUNDS_DIR, path.basename(soundPath));
-  console.log(`[WS] Playing sound: ${fullPath}`);
 
   // Try ffplay first (handles MP3 better), fallback to aplay
   const useFFplay = true; // Set to false to use aplay
@@ -188,12 +153,11 @@ function playSoundOnServer(soundId) {
     currentAudioProcess = spawn("aplay", aplayArgs);
   }
 
-  currentAudioProcess.on("error", (err) => {
-    console.log(`[WS] Error playing sound ${soundId}:`, err.message);
+  currentAudioProcess.on("error", () => {
     currentAudioProcess = null;
   });
 
-  currentAudioProcess.on("close", (code) => {
+  currentAudioProcess.on("close", () => {
     currentAudioProcess = null;
   });
 }
