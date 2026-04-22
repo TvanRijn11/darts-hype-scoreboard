@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import "./globals.css"; // Global styles
 import ServiceWorkerRegistration from "@/src/components/ui/ServiceWorkerRegistration";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 export const metadata: Metadata = {
   title: "Dart Teller",
@@ -19,6 +19,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body suppressHydrationWarning className="bg-zinc-950">
         <Analytics/>
+        <SpeedInsights/>
         <ServiceWorkerRegistration />
         {children}
       </body>
